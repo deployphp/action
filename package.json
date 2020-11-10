@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "execa": "^4.1.0"
+  }
+}

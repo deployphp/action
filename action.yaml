@@ -1,0 +1,20 @@
+name: 'deployer'
+description: 'Deploy with Deployer'
+inputs:
+  private-key:
+    description: 'Private key'
+    required: true
+  known-hosts:
+    description: 'Known hosts'
+    required: false
+    default: ''
+  dep:
+    description: 'Deployer command',
+    required: false
+    default: ''
+runs:
+  using: 'node12'
+  main: 'index.js'
+branding:
+  color: blue
+  icon: server
