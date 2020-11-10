@@ -3,8 +3,12 @@ const fs = require('fs')
 const execa = require('execa')
 
 void function main() {
-  ssh()
-  dep()
+  try {
+    ssh()
+    dep()
+  } catch (err) {
+    core.setFailed(err.message)
+  }
 }()
 
 function ssh() {
