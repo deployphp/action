@@ -1,5 +1,4 @@
-# action
-GitHub Action for Deployer
+# GitHub Action for Deployer
 
 
 ## Example
