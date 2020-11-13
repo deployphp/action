@@ -1,4 +1,4 @@
-name: 'deployphp/action'
+name: 'deployer'
 description: 'Deploy with Deployer'
 inputs:
   private-key:
