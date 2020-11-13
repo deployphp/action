@@ -1,18 +1,19 @@
 # GitHub Action for Deployer
 
+```yaml
+  - name: Deploy
+    uses: deployer/deploy@v1
+    with:
+      private-key: ${{ secrets.PRIVATE_KEY }}
+      known-hosts: ${{ secrets.KNOWN_HOSTS }}
+      dep: deploy prod -v
+```
+
 ## Inputs
 
-### `private-key`
-
-Required. A private key to accessing servers.
-
-### `known-hosts` 
-
-Optional. Host fingerprints. If omitted `StrictHostKeyChecking=no` will be used.
-
-### `dep`
-
-Arguments to pass to Deployer command.
+- `private-key` - Required. A private key to accessing servers.
+- `known-hosts` - Optional. Host fingerprints. If omitted `StrictHostKeyChecking=no` will be used.
+- `dep` - Required. Arguments to pass to Deployer command.
 
 ## Deployer version
 
@@ -36,7 +37,7 @@ deploy:
     with:
       php-version: 7.4
   - name: Deploy
-    uses: deployphp/action@v1
+    uses: deployer/deploy@v1
     with:
       private-key: ${{ secrets.PRIVATE_KEY }}
       known-hosts: ${{ secrets.KNOWN_HOSTS }}
