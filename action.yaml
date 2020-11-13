@@ -17,4 +17,4 @@ runs:
   main: 'index.js'
 branding:
   color: blue
-  icon: server
+  icon: airplay
