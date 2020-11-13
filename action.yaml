@@ -9,7 +9,7 @@ inputs:
     required: false
     default: ''
   dep:
-    description: 'Deployer command',
+    description: 'Deployer command'
     required: false
     default: ''
 runs:
