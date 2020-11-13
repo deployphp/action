@@ -20,6 +20,7 @@ First, the action will check for Deployer bin at those paths:
 - `vendor/bin/dep`
 - `bin/dep`
 - `deployer.phar`
+
 If bin not found, phar version will be downloaded. 
 
 ## Example
