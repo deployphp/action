@@ -2,7 +2,7 @@
 
 ```yaml
   - name: Deploy
-    uses: deployer/deploy@master
+    uses: deployphp/action@master
     with:
       private-key: ${{ secrets.PRIVATE_KEY }}
       known-hosts: ${{ secrets.KNOWN_HOSTS }}
@@ -37,7 +37,7 @@ deploy:
     with:
       php-version: 7.4
   - name: Deploy
-    uses: deployer/deploy@master
+    uses: deployphp/action@master
     with:
       private-key: ${{ secrets.PRIVATE_KEY }}
       known-hosts: ${{ secrets.KNOWN_HOSTS }}
