@@ -1,6 +1,7 @@
 const core = require('@actions/core')
 const fs = require('fs')
 const execa = require('execa')
+const split = require('argv-split')
 
 void function main() {
   try {
@@ -45,5 +46,5 @@ function dep() {
     dep = 'deployer.phar'
   }
 
-  execa.commandSync(`${dep} ${core.getInput('dep')}`)
+  execa.sync(dep, split(core.getInput('dep')))
 }
