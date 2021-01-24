@@ -25,7 +25,7 @@ function ssh() {
 
   let knownHosts = core.getInput('known-hosts')
   if (knownHosts === '') {
-    fs.appendFileSync(`/etc/ssh/ssh_config`, `StrictHostKeyChecking no`)
+    fs.appendFileSync(`${ssh}/config`, `StrictHostKeyChecking no`)
   } else {
     fs.appendFileSync(`${ssh}/known_hosts`, knownHosts)
     fs.chmodSync(`${ssh}/known_hosts`, '644')
