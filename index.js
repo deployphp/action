@@ -14,7 +14,10 @@ void function main() {
 
 function ssh() {
   let ssh = `${process.env['HOME']}/.ssh`
-  fs.mkdirSync(ssh)
+
+  if (!fs.existsSync(ssh)) {
+    fs.mkdirSync(ssh)
+  }
 
   let authSock = '/tmp/ssh-auth.sock'
   execa.sync('ssh-agent', ['-a', authSock])
