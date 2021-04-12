@@ -26,12 +26,17 @@ function ssh() {
   let privateKey = core.getInput('private-key').replace('/\r/g', '').trim() + '\n'
   execa.sync('ssh-add', ['-'], {input: privateKey})
 
-  let knownHosts = core.getInput('known-hosts')
-  if (knownHosts === '') {
-    fs.appendFileSync(`${ssh}/config`, `StrictHostKeyChecking no`)
-  } else {
+  const knownHosts = core.getInput('known-hosts')
+  if (knownHosts !== '') {
     fs.appendFileSync(`${ssh}/known_hosts`, knownHosts)
     fs.chmodSync(`${ssh}/known_hosts`, '644')
+  } else {
+    fs.appendFileSync(`${ssh}/config`, `StrictHostKeyChecking no`)
+  }
+
+  const sshConfig = core.getInput('ssh-config')
+  if (sshConfig !== '') {
+    fs.writeFile(`${ssh}/config`, sshConfig)
   }
 }
 
