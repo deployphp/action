@@ -46,6 +46,7 @@ function dep() {
 
   if (!dep) {
     execa.commandSync('curl -LO https://deployer.org/deployer.phar')
+    execa.commandSync('sudo chmod +x deployer.phar')
     dep = 'deployer.phar'
   }
 
