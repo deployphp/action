@@ -6,13 +6,15 @@
     with:
       private-key: ${{ secrets.PRIVATE_KEY }}
       known-hosts: ${{ secrets.KNOWN_HOSTS }}
+      ssh-config: ${{ secrets.SSH_CONFIG }}
       dep: deploy prod -v
 ```
 
 ## Inputs
 
 - `private-key` - Required. A private key to accessing servers.
-- `known-hosts` - Optional. Host fingerprints. If omitted `StrictHostKeyChecking=no` will be used.
+- `known-hosts` - Optional. Host fingerprints. If omitted `StrictHostKeyChecking=no` will be used unless `ssh-config` is provided.
+- `ssh-config` - Optional. SSH configuration.
 - `dep` - Required. Arguments to pass to Deployer command.
 
 ## Deployer version
@@ -41,5 +43,6 @@ deploy:
     with:
       private-key: ${{ secrets.PRIVATE_KEY }}
       known-hosts: ${{ secrets.KNOWN_HOSTS }}
+      ssh-config: ${{ secrets.SSH_CONFIG }}
       dep: deploy prod -v
 ```

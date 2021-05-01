@@ -8,6 +8,10 @@ inputs:
     description: 'Known hosts'
     required: false
     default: ''
+  ssh-config:
+    description: 'SSH configuration'
+    required: false
+    default: ''
   dep:
     description: 'Deployer command'
     required: false
