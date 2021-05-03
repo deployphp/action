@@ -55,5 +55,5 @@ function dep() {
     dep = 'deployer.phar'
   }
 
-  execa.sync(dep, split(core.getInput('dep')))
+  execa(dep, split(core.getInput('dep'))).stdout.pipe(process.stdout);
 }
