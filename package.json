@@ -1,8 +1,8 @@
 {
   "private": true,
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.2.7",
     "argv-split": "^2.0.1",
-    "execa": "^4.1.0"
+    "execa": "^5.0.0"
   }
 }
