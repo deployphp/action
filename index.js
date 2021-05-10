@@ -55,5 +55,11 @@ function dep() {
     dep = 'deployer.phar'
   }
 
-  execa(dep, split(core.getInput('dep'))).stdout.pipe(process.stdout);
+  const subprocess = execa(dep, split(core.getInput('dep')))
+
+  subprocess.stdout.pipe(process.stdout);
+
+  subprocess.catch(err => {
+    core.setFailed(err.shortMessage)
+  })
 }
