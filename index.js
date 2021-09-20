@@ -29,14 +29,16 @@ function ssh() {
   const knownHosts = core.getInput('known-hosts')
   if (knownHosts !== '') {
     fs.appendFileSync(`${ssh}/known_hosts`, knownHosts)
-    fs.chmodSync(`${ssh}/known_hosts`, '644')
+    fs.chmodSync(`${ssh}/known_hosts`, '600')
   } else {
     fs.appendFileSync(`${ssh}/config`, `StrictHostKeyChecking no`)
+    fs.chmodSync(`${ssh}/config`, '600')
   }
 
   const sshConfig = core.getInput('ssh-config')
   if (sshConfig !== '') {
     fs.writeFile(`${ssh}/config`, sshConfig)
+    fs.chmodSync(`${ssh}/config`, '600')
   }
 }
 
@@ -52,7 +54,7 @@ function dep() {
   if (!dep) {
     execa.commandSync('curl -LO https://deployer.org/deployer.phar')
     execa.commandSync('sudo chmod +x deployer.phar')
-    dep = 'deployer.phar'
+    dep = './deployer.phar'
   }
 
   const subprocess = execa(dep, split(core.getInput('dep')))
