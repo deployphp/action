@@ -46,6 +46,7 @@ async function dep() {
   for (let c of ['vendor/bin/dep', 'deployer.phar']) {
     if (fs.existsSync(c)) {
       dep = c
+      console.log(`Using "${c}".`)
       break
     }
   }
@@ -53,11 +54,13 @@ async function dep() {
   if (!dep) {
     let version = core.getInput('deployer-version')
     if (version === '') {
+      console.log(`Downloading "https://deployer.org/deployer.phar".`)
       execa.commandSync('curl -LO https://deployer.org/deployer.phar')
     } else {
       if (!/^v/.test(version)) {
         version = 'v' + version
       }
+      console.log(`Downloading "https://deployer.org/releases/${version}/deployer.phar".`)
       execa.commandSync(`curl -LO https://deployer.org/releases/${version}/deployer.phar`)
     }
     execa.commandSync('sudo chmod +x deployer.phar')
