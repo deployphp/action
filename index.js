@@ -64,12 +64,15 @@ async function dep() {
     dep = 'deployer.phar'
   }
 
-  let p = execa.command(`php ${dep} --ansi -v ${core.getInput('dep')}`)
+  let cmd = core.getInput('dep')
+
+  let p = execa.command(`php ${dep} --ansi -v ${cmd}`)
   p.stdout.pipe(process.stdout)
   p.stderr.pipe(process.stderr)
+
   try {
     await p
   } catch (err) {
-    core.setFailed(err.shortMessage)
+    core.setFailed(`Failed: dep ${cmd}`)
   }
 }
