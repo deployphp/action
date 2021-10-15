@@ -12,10 +12,10 @@ void async function main() {
 }()
 
 async function ssh() {
-  let ssh = `${process.env['HOME']}/.ssh`
+  let sshHomeDir = `${process.env['HOME']}/.ssh`
 
-  if (!fs.existsSync(ssh)) {
-    fs.mkdirSync(ssh)
+  if (!fs.existsSync(sshHomeDir)) {
+    fs.mkdirSync(sshHomeDir)
   }
 
   let authSock = '/tmp/ssh-auth.sock'
@@ -27,17 +27,17 @@ async function ssh() {
 
   const knownHosts = core.getInput('known-hosts')
   if (knownHosts !== '') {
-    fs.appendFileSync(`${ssh}/known_hosts`, knownHosts)
-    fs.chmodSync(`${ssh}/known_hosts`, '600')
+    fs.appendFileSync(`${sshHomeDir}/known_hosts`, knownHosts)
+    fs.chmodSync(`${sshHomeDir}/known_hosts`, '600')
   } else {
-    fs.appendFileSync(`${ssh}/config`, `StrictHostKeyChecking no`)
-    fs.chmodSync(`${ssh}/config`, '600')
+    fs.appendFileSync(`${sshHomeDir}/config`, `StrictHostKeyChecking no`)
+    fs.chmodSync(`${sshHomeDir}/config`, '600')
   }
 
-  const sshConfig = core.getInput('ssh-config')
+  let sshConfig = core.getInput('ssh-config')
   if (sshConfig !== '') {
-    fs.writeFileSync(`${ssh}/config`, sshConfig)
-    fs.chmodSync(`${ssh}/config`, '600')
+    fs.writeFileSync(`${sshHomeDir}/config`, sshConfig)
+    fs.chmodSync(`${sshHomeDir}/config`, '600')
   }
 }
 
@@ -51,12 +51,20 @@ async function dep() {
   }
 
   if (!dep) {
-    execa.commandSync('curl -LO https://deployer.org/deployer.phar')
+    let version = core.getInput('deployer-version')
+    if (version === '') {
+      execa.commandSync('curl -LO https://deployer.org/deployer.phar')
+    } else {
+      if (!/^v/.test(version)) {
+        version = 'v' + version
+      }
+      execa.commandSync(`curl -LO https://deployer.org/releases/${version}/deployer.phar`)
+    }
     execa.commandSync('sudo chmod +x deployer.phar')
     dep = 'deployer.phar'
   }
 
-  let p = execa.command(`php ${dep} ${core.getInput('dep')}`)
+  let p = execa.command(`php ${dep} --ansi -v ${core.getInput('dep')}`)
   p.stdout.pipe(process.stdout)
   p.stderr.pipe(process.stderr)
   try {
