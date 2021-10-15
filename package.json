@@ -1,8 +1,10 @@
 {
   "private": true,
   "dependencies": {
-    "@actions/core": "^1.2.7",
-    "argv-split": "^2.0.1",
-    "execa": "^5.0.0"
+    "@actions/core": "^1.6.0",
+    "execa": "^5.1.1"
+  },
+  "engines": {
+    "node": ">=12"
   }
 }

@@ -2,29 +2,24 @@
 
 ```yaml
   - name: Deploy
-    uses: deployphp/action@master
+    uses: deployphp/action@1
     with:
       private-key: ${{ secrets.PRIVATE_KEY }}
-      known-hosts: ${{ secrets.KNOWN_HOSTS }}
-      ssh-config: ${{ secrets.SSH_CONFIG }}
-      dep: deploy prod -v
+      dep: deploy all
 ```
 
 ## Inputs
 
-- `private-key` - Required. A private key to accessing servers.
-- `known-hosts` - Optional. Host fingerprints. If omitted `StrictHostKeyChecking=no` will be used unless `ssh-config` is provided.
-- `ssh-config` - Optional. SSH configuration.
-- `dep` - Required. Arguments to pass to Deployer command.
+See [action.yaml](action.yaml).
 
 ## Deployer version
 
-First, the action will check for Deployer bin at those paths:
+First, the action will check for Deployer binary at those paths:
 - `vendor/bin/dep`
-- `bin/dep`
 - `deployer.phar`
 
-If bin not found, phar version will be downloaded. 
+If the binary not found, phar version will be downloaded from 
+[deployer.org](https://deployer.org/download).
 
 ## Example
 

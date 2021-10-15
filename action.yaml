@@ -1,24 +1,42 @@
 name: 'deployphp/action'
+
 description: 'Deploy with Deployer'
+
 inputs:
+
   private-key:
-    description: 'Private key'
     required: true
-  known-hosts:
-    description: 'Known hosts'
-    required: false
-    default: ''
-  ssh-config:
-    description: 'SSH configuration'
-    required: false
-    default: ''
+    description: >
+      Private key for connecting to remote hosts. To generate private key:
+      `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
+
   dep:
-    description: 'Deployer command'
+    required: true
+    description: >
+      The deployer task to run. For example:
+      `deploy all`.
+
+  known-hosts:
     required: false
     default: ''
+    description: >
+      Content of `~/.ssh/known_hosts` file. The public SSH keys for a
+      host may be obtained using the utility `ssh-keyscan`. For example,
+      `ssh-keyscan deployer.org`.
+
+      If known-hosts omitted, `StrictHostKeyChecking no` will be added to
+      `ssh_config`.
+
+  ssh-config:
+    required: false
+    default: ''
+    description: >
+      The SSH configuration.
+
 runs:
   using: 'node12'
   main: 'index.js'
+
 branding:
   color: blue
   icon: send

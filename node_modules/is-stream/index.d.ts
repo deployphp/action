@@ -1,4 +1,3 @@
-/// <reference types="node"/>
 import * as stream from 'stream';
 
 declare const isStream: {

@@ -23,7 +23,6 @@ isStream.duplex = stream =>
 
 isStream.transform = stream =>
 	isStream.duplex(stream) &&
-	typeof stream._transform === 'function' &&
-	typeof stream._transformState === 'object';
+	typeof stream._transform === 'function';
 
 module.exports = isStream;

@@ -1,18 +1,17 @@
 const core = require('@actions/core')
 const fs = require('fs')
 const execa = require('execa')
-const split = require('argv-split')
 
-void function main() {
+void async function main() {
   try {
-    ssh()
-    dep()
+    await ssh()
+    await dep()
   } catch (err) {
     core.setFailed(err.message)
   }
 }()
 
-function ssh() {
+async function ssh() {
   let ssh = `${process.env['HOME']}/.ssh`
 
   if (!fs.existsSync(ssh)) {
@@ -37,14 +36,14 @@ function ssh() {
 
   const sshConfig = core.getInput('ssh-config')
   if (sshConfig !== '') {
-    fs.writeFile(`${ssh}/config`, sshConfig)
+    fs.writeFileSync(`${ssh}/config`, sshConfig)
     fs.chmodSync(`${ssh}/config`, '600')
   }
 }
 
-function dep() {
+async function dep() {
   let dep
-  for (let c of ['vendor/bin/dep', 'bin/dep', 'deployer.phar']) {
+  for (let c of ['vendor/bin/dep', 'deployer.phar']) {
     if (fs.existsSync(c)) {
       dep = c
       break
@@ -54,14 +53,15 @@ function dep() {
   if (!dep) {
     execa.commandSync('curl -LO https://deployer.org/deployer.phar')
     execa.commandSync('sudo chmod +x deployer.phar')
-    dep = './deployer.phar'
+    dep = 'deployer.phar'
   }
 
-  const subprocess = execa(dep, split(core.getInput('dep')))
-
-  subprocess.stdout.pipe(process.stdout);
-
-  subprocess.catch(err => {
+  let p = execa.command(`php ${dep} ${core.getInput('dep')}`)
+  p.stdout.pipe(process.stdout)
+  p.stderr.pipe(process.stderr)
+  try {
+    await p
+  } catch (err) {
     core.setFailed(err.shortMessage)
-  })
+  }
 }
