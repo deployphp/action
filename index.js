@@ -42,7 +42,9 @@ async function ssh() {
 }
 
 async function dep() {
-  let dep
+  let dep = core.getInput('deployer-binary')
+
+  if (dep === '')
   for (let c of ['vendor/bin/dep', 'deployer.phar']) {
     if (fs.existsSync(c)) {
       dep = c
@@ -51,7 +53,7 @@ async function dep() {
     }
   }
 
-  if (!dep) {
+  if (dep === '') {
     let version = core.getInput('deployer-version')
     if (version === '') {
       console.log(`Downloading "https://deployer.org/deployer.phar".`)

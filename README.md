@@ -10,11 +10,59 @@
 
 ## Inputs
 
-See [action.yaml](action.yaml).
+```yaml
+  - name: Deploy
+    uses: deployphp/action@v1
+    with:
+      # Private key for connecting to remote hosts. To generate private key:
+      # `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
+      # Required.
+      private-key: ${{ secrets.PRIVATE_KEY }}
+
+      # The deployer task to run. For example:
+      # `deploy all`.
+      # Required.
+      dep: deploy
+
+      # Content of `~/.ssh/known_hosts` file. The public SSH keys for a
+      # host may be obtained using the utility `ssh-keyscan`. 
+      # For example: `ssh-keyscan deployer.org`.
+      # If known-hosts omitted, `StrictHostKeyChecking no` will be added to
+      # `ssh_config`.
+      # Optional.
+      known-hosts: |
+        ...
+
+      # The SSH configuration. Content of `~/.ssh/config` file.
+      # Optional.
+      ssh-config: |
+        ...
+    
+      # Deployer version to download from deployer.org.
+      # First, the action will check for Deployer binary at those paths:
+      # - `vendor/bin/dep`
+      # - `deployer.phar`
+      # If the binary not found, phar version will be downloaded from
+      # deployer.org.
+      # Optional.
+      deployer-version: "7.0.0"
+
+      # You can specify path to your local Deployer binary in the repo.
+      # Optional.
+      deployer-binary: "bin/dep"
+```
 
 ## Example
 
 ```yaml
+name: deploy
+
+on: push
+
+# It is important to specify "concurrency" for the workflow,
+# to prevent concurrency between different deploys.
+concurrency: production_environment
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

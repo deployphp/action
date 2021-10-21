@@ -6,45 +6,31 @@ inputs:
 
   private-key:
     required: true
-    description: >
-      Private key for connecting to remote hosts. To generate private key:
-      `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
+    description: The private key for connecting to remote hosts.
 
   dep:
     required: true
-    description: >
-      The deployer task to run. For example:
-      `deploy all`.
+    description: The command.
 
   known-hosts:
     required: false
     default: ''
-    description: >
-      Content of `~/.ssh/known_hosts` file. The public SSH keys for a
-      host may be obtained using the utility `ssh-keyscan`. For example,
-      `ssh-keyscan deployer.org`.
-
-      If known-hosts omitted, `StrictHostKeyChecking no` will be added to
-      `ssh_config`.
+    description: Content of `~/.ssh/known_hosts` file.
 
   ssh-config:
     required: false
     default: ''
-    description: >
-      The SSH configuration. Content of `~/.ssh/config` file.
+    description: The SSH configuration
 
   deployer-version:
     required: false
     default: ''
-    description: >
-      Deployer version to download from deployer.org.
+    description: Deployer version to download from deployer.org.
 
-      First, the action will check for Deployer binary at those paths:
-      - `vendor/bin/dep`
-      - `deployer.phar`
-
-      If the binary not found, phar version will be downloaded from
-      [deployer.org](https://deployer.org/download).
+  deployer-binary:
+    required: false
+    default: ''
+    description: Path to local Deployer binary.
 
 runs:
   using: 'node12'
