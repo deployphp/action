@@ -59,11 +59,22 @@ async function dep() {
       console.log(`Downloading "https://deployer.org/deployer.phar".`)
       execa.commandSync('curl -LO https://deployer.org/deployer.phar')
     } else {
-      if (!/^v/.test(version)) {
-        version = 'v' + version
+      version = version.replace(/^v/, '')
+      let {stdout} = execa.commandSync(`curl -L https://deployer.org/manifest.json`)
+      let manifest = JSON.parse(stdout)
+      let url
+      for (let asset of manifest) {
+        if (asset.version === version) {
+          url = asset.url
+          break
+        }
       }
-      console.log(`Downloading "https://deployer.org/releases/${version}/deployer.phar".`)
-      execa.commandSync(`curl -LO https://deployer.org/releases/${version}/deployer.phar`)
+      if (url === null) {
+        console.error(`The version "${version}"" does not found in the "https://deployer.org/manifest.json" file."`)
+      } else {
+        console.log(`Downloading "${url}".`)
+        execa.commandSync(`curl -LO ${url}`)
+      }
     }
     execa.commandSync('sudo chmod +x deployer.phar')
     dep = 'deployer.phar'
