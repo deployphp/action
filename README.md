@@ -40,6 +40,7 @@
     
       # Deployer version to download from deployer.org.
       # First, the action will check for Deployer binary at those paths:
+      # - `vendor/bin/deployer.phar`
       # - `vendor/bin/dep`
       # - `deployer.phar`
       # If the binary not found, phar version will be downloaded from

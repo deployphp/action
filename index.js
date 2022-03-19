@@ -45,7 +45,7 @@ async function dep() {
   let dep = core.getInput('deployer-binary')
 
   if (dep === '')
-  for (let c of ['vendor/bin/dep', 'deployer.phar']) {
+  for (let c of ['vendor/bin/deployer.phar', 'vendor/bin/dep', 'deployer.phar']) {
     if (fs.existsSync(c)) {
       dep = c
       console.log(`Using "${c}".`)
