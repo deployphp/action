@@ -82,7 +82,7 @@ async function dep() {
 
   let cmd = core.getInput('dep')
 
-  let p = execa.command(`php ${dep} --ansi -v ${cmd}`)
+  let p = execa.command(`php ${dep} --no-interaction --ansi -v ${cmd}`)
   p.stdout.pipe(process.stdout)
   p.stderr.pipe(process.stderr)
 
