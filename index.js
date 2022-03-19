@@ -70,7 +70,7 @@ async function dep() {
         }
       }
       if (url === null) {
-        console.error(`The version "${version}"" does not found in the "https://deployer.org/manifest.json" file."`)
+        console.error(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
       } else {
         console.log(`Downloading "${url}".`)
         execa.commandSync(`curl -LO ${url}`)
