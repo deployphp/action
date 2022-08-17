@@ -81,8 +81,10 @@ async function dep() {
   }
 
   let cmd = core.getInput('dep')
+  let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi';
+  let verbosity = core.getInput('verbosity');
 
-  let p = execa.command(`php ${dep} --no-interaction --ansi -v ${cmd}`)
+  let p = execa.command(`php ${dep} --no-interaction ${ansi} ${verbosity} ${cmd}`)
   p.stdout.pipe(process.stdout)
   p.stderr.pipe(process.stderr)
 
