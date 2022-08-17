@@ -51,6 +51,14 @@
       # You can specify path to your local Deployer binary in the repo.
       # Optional.
       deployer-binary: "bin/dep"
+
+      # You can choose to disable ANSI output.
+      # Optional. Defaults to true.
+      ansi: false
+
+      # You can specify the output verbosity level.
+      # Optional. Defaults to -v.
+      verbosity: -vvv
 ```
 
 ## Example

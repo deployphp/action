@@ -32,6 +32,16 @@ inputs:
     default: ''
     description: Path to local Deployer binary.
 
+  ansi:
+    required: false
+    default: 'true'
+    description: Whether to enable ANSI output.
+
+  verbosity:
+    required: false
+    default: '-v'
+    description: Verbosity level Can be -v, -vv or -vvv.
+
 runs:
   using: 'node12'
   main: 'index.js'
