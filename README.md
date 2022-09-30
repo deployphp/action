@@ -4,8 +4,8 @@
   - name: Deploy
     uses: deployphp/action@v1
     with:
-      private-key: ${{ secrets.PRIVATE_KEY }}
       dep: deploy
+      private-key: ${{ secrets.PRIVATE_KEY }}
 ```
 
 ## Inputs
@@ -14,15 +14,15 @@
   - name: Deploy
     uses: deployphp/action@v1
     with:
-      # Private key for connecting to remote hosts. To generate private key:
-      # `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
-      # Required.
-      private-key: ${{ secrets.PRIVATE_KEY }}
-
       # The deployer task to run. For example:
       # `deploy all`.
       # Required.
       dep: deploy
+
+      # Private key for connecting to remote hosts. To generate private key:
+      # `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
+      # Optional.
+      private-key: ${{ secrets.PRIVATE_KEY }}
 
       # Content of `~/.ssh/known_hosts` file. The public SSH keys for a
       # host may be obtained using the utility `ssh-keyscan`. 
@@ -87,6 +87,6 @@ jobs:
       - name: Deploy
         uses: deployphp/action@v1
         with:
-          private-key: ${{ secrets.PRIVATE_KEY }}
           dep: deploy
+          private-key: ${{ secrets.PRIVATE_KEY }}
 ```
