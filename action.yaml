@@ -4,13 +4,14 @@ description: 'Deploy with Deployer'
 
 inputs:
 
-  private-key:
-    required: true
-    description: The private key for connecting to remote hosts.
-
   dep:
     required: true
     description: The command.
+
+  private-key:
+    required: false
+    default: ''
+    description: The private key for connecting to remote hosts.
 
   known-hosts:
     required: false

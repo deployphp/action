@@ -22,8 +22,11 @@ async function ssh() {
   execa.sync('ssh-agent', ['-a', authSock])
   core.exportVariable('SSH_AUTH_SOCK', authSock)
 
-  let privateKey = core.getInput('private-key').replace('/\r/g', '').trim() + '\n'
-  execa.sync('ssh-add', ['-'], {input: privateKey})
+  let privateKey = core.getInput('private-key')
+  if (privateKey !== '') {
+    privateKey = privateKey.replace('/\r/g', '').trim() + '\n'
+    execa.sync('ssh-add', ['-'], {input: privateKey})
+  }
 
   const knownHosts = core.getInput('known-hosts')
   if (knownHosts !== '') {
