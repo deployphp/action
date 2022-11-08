@@ -44,7 +44,7 @@ inputs:
     description: Verbosity level Can be -v, -vv or -vvv.
 
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'index.js'
 
 branding:
