@@ -1,0 +1,91 @@
+{
+  "name": "zx",
+  "version": "7.1.1",
+  "description": "A tool for writing better scripts.",
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./build/index.d.ts"
+      ],
+      "globals": [
+        "./build/globals.d.ts"
+      ],
+      "experimental": [
+        "./build/experimental.d.ts"
+      ],
+      "cli": [
+        "./build/cli.d.ts"
+      ],
+      "core": [
+        "./build/core.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    ".": "./build/index.js",
+    "./globals": "./build/globals.js",
+    "./experimental": "./build/experimental.js",
+    "./cli": "./build/cli.js",
+    "./core": "./build/core.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "zx": "./build/cli.js"
+  },
+  "engines": {
+    "node": ">= 16.0.0"
+  },
+  "scripts": {
+    "fmt": "prettier --write .",
+    "fmt:check": "prettier --check .",
+    "build": "tsc --project tsconfig.prod.json",
+    "build:check": "tsc",
+    "test": "npm run build && PATH=$(env -i bash -c 'echo $PATH') node_modules/.bin/uvu test -i fixtures",
+    "test:types": "tsd",
+    "coverage": "c8 --check-coverage npm test -- -i package",
+    "mutation": "stryker run",
+    "circular": "madge --circular src/*"
+  },
+  "dependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/minimist": "^1.2.2",
+    "@types/node": "^18.7.20",
+    "@types/ps-tree": "^1.1.2",
+    "@types/which": "^2.0.1",
+    "chalk": "^5.0.1",
+    "fs-extra": "^10.1.0",
+    "globby": "^13.1.2",
+    "minimist": "^1.2.6",
+    "node-fetch": "3.2.10",
+    "ps-tree": "^1.2.0",
+    "which": "^2.0.2",
+    "yaml": "^2.1.1"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "^6.2.2",
+    "c8": "^7.12.0",
+    "madge": "^5.0.1",
+    "prettier": "^2.7.1",
+    "tsd": "^0.24.1",
+    "typescript": "^4.8.3",
+    "uvu": "^0.5.6"
+  },
+  "publishConfig": {
+    "registry": "https://wombat-dressing-room.appspot.com"
+  },
+  "files": [
+    "build",
+    "zx.js"
+  ],
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "endOfLine": "lf"
+  },
+  "repository": "google/zx",
+  "author": "Anton Medvedev <anton@medv.io>",
+  "license": "Apache-2.0"
+}
