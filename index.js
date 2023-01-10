@@ -100,7 +100,7 @@ async function dep() {
     dep = 'deployer.phar'
   }
 
-  let cmd = core.getInput('dep')
+  let cmd = core.getInput('dep').split(' ')
   let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
   let verbosity = core.getInput('verbosity')
   let options = []
@@ -113,7 +113,7 @@ async function dep() {
   }
 
   try {
-    await $`php ${dep} --no-interaction ${ansi} ${verbosity} ${cmd} ${options}`
+    await $`php ${dep} ${cmd} --no-interaction ${ansi} ${verbosity} ${options}`
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }
