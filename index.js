@@ -1,6 +1,5 @@
-const core = require('@actions/core')
-const fs = require('fs')
-const execa = require('execa')
+import core from '@actions/core'
+import { $, fs } from 'zx'
 
 void async function main() {
   try {
@@ -12,8 +11,8 @@ void async function main() {
 }()
 
 async function ssh() {
-  if (core.getBooleanInput('self-hosted')) {
-    return;
+  if (core.getBooleanInput('skip-ssh-setup')) {
+    return
   }
 
   let sshHomeDir = `${process.env['HOME']}/.ssh`
@@ -23,13 +22,16 @@ async function ssh() {
   }
 
   let authSock = '/tmp/ssh-auth.sock'
-  execa.sync('ssh-agent', ['-a', authSock])
+  await $`ssh-agent -a ${authSock}`
   core.exportVariable('SSH_AUTH_SOCK', authSock)
 
   let privateKey = core.getInput('private-key')
   if (privateKey !== '') {
     privateKey = privateKey.replace('/\r/g', '').trim() + '\n'
-    execa.sync('ssh-add', ['-'], {input: privateKey})
+    let p = $`ssh-add -`
+    p.stdin.write(privateKey)
+    p.stdin.end()
+    await p
   }
 
   const knownHosts = core.getInput('known-hosts')
@@ -52,51 +54,66 @@ async function dep() {
   let dep = core.getInput('deployer-binary')
 
   if (dep === '')
-  for (let c of ['vendor/bin/deployer.phar', 'vendor/bin/dep', 'deployer.phar']) {
-    if (fs.existsSync(c)) {
-      dep = c
-      console.log(`Using "${c}".`)
-      break
+    for (let c of ['vendor/bin/deployer.phar', 'vendor/bin/dep', 'deployer.phar']) {
+      if (fs.existsSync(c)) {
+        dep = c
+        console.log(`Using "${c}".`)
+        break
+      }
     }
-  }
 
   if (dep === '') {
     let version = core.getInput('deployer-version')
-    if (version === '') {
-      console.log(`Downloading "https://deployer.org/deployer.phar".`)
-      execa.commandSync('curl -LO https://deployer.org/deployer.phar')
-    } else {
-      version = version.replace(/^v/, '')
-      let {stdout} = execa.commandSync(`curl -L https://deployer.org/manifest.json`)
-      let manifest = JSON.parse(stdout)
-      let url
-      for (let asset of manifest) {
-        if (asset.version === version) {
-          url = asset.url
-          break
-        }
+    if (version === '' && fs.existsSync('composer.lock')) {
+      let lock = JSON.parse(fs.readFileSync('composer.lock', 'utf8'))
+      if (lock['packages']) {
+        version = lock['packages']
+          .find(p => p.name === 'deployer/deployer')
+          .version
       }
-      if (url === null) {
-        console.error(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
-      } else {
-        console.log(`Downloading "${url}".`)
-        execa.commandSync(`curl -LO ${url}`)
+      if (version === '' && lock['packages-dev']) {
+        version = lock['packages-dev']
+          .find(p => p.name === 'deployer/deployer')
+          .version
       }
     }
-    execa.commandSync('sudo chmod +x deployer.phar')
+    if (version === '') {
+      throw new Error('Deployer binary not found. Please specify deployer-binary or deployer-version.')
+    }
+    version = version.replace(/^v/, '')
+    let manifest = JSON.parse((await $`curl -L https://deployer.org/manifest.json`).stdout)
+    let url
+    for (let asset of manifest) {
+      if (asset.version === version) {
+        url = asset.url
+        break
+      }
+    }
+    if (url === null) {
+      console.error(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
+    } else {
+      console.log(`Downloading "${url}".`)
+      await $`curl -LO ${url}`
+    }
+
+    await $`sudo chmod +x deployer.phar`
     dep = 'deployer.phar'
   }
 
   let cmd = core.getInput('dep')
-  let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi';
-  let verbosity = core.getInput('verbosity');
-
-  let p = execa.command(`php ${dep} --no-interaction ${ansi} ${verbosity} ${cmd}`)
-  p.stdout.pipe(process.stdout)
-  p.stderr.pipe(process.stderr)
+  let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
+  let verbosity = core.getInput('verbosity')
+  let options = []
+  try {
+    for (let [key, value] in Object.entries(JSON.parse(core.getInput('options')))) {
+      options.push('-o', `${key}=${value}`)
+    }
+  } catch (e) {
+    console.error('Invalid JSON in options')
+  }
 
   try {
-    await p
+    await $`php ${dep} --no-interaction ${ansi} ${verbosity} ${cmd} ${options}`
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }

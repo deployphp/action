@@ -8,10 +8,10 @@ inputs:
     required: true
     description: The command.
 
-  self-hosted:
+  options:
     required: false
-    default: 'false'
-    description: Whether the action is running on a self-hosted runner.
+    default: ''
+    description: List of options for the Deployer.
 
   private-key:
     required: false
@@ -27,6 +27,11 @@ inputs:
     required: false
     default: ''
     description: The SSH configuration
+
+  skip-ssh-setup:
+    required: false
+    default: 'false'
+    description: Whether the SSH setup should be skipped.
 
   deployer-version:
     required: false

@@ -18,10 +18,11 @@
       # `deploy all`.
       # Required.
       dep: deploy
-
-      # Option to skip over the SSH setup/configuration
-      # Self hosted runners don't need the SSH configuration or the SSH agent to be started
-      self-hosted: false
+      
+      # Config options for the Deployer. Same as the `-o` flag in the CLI.
+      # Optional.
+      options:
+        keep_releases: 7
 
       # Private key for connecting to remote hosts. To generate private key:
       # `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
@@ -41,6 +42,12 @@
       # Optional.
       ssh-config: |
         ...
+        
+      # Option to skip over the SSH setup/configuration.
+      # Self-hosted runners don't need the SSH configuration or the SSH agent 
+      # to be started.
+      # Optional.
+      skip-ssh-setup: false        
     
       # Deployer version to download from deployer.org.
       # First, the action will check for Deployer binary at those paths:
