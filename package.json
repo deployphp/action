@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "dependencies": {
     "@actions/core": "^1.10.0",
     "zx": "^7.1.1"
