@@ -19,6 +19,10 @@
       # Required.
       dep: deploy
 
+      # Option to skip over the SSH setup/configuration
+      # Self hosted runners don't need the SSH configuration or the SSH agent to be started
+      self-hosted: false
+
       # Private key for connecting to remote hosts. To generate private key:
       # `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
       # Optional.

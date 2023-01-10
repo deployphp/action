@@ -8,6 +8,11 @@ inputs:
     required: true
     description: The command.
 
+  self-hosted:
+    required: false
+    default: 'false'
+    description: Whether the action is running on a self-hosted runner.
+
   private-key:
     required: false
     default: ''

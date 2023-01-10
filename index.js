@@ -12,6 +12,10 @@ void async function main() {
 }()
 
 async function ssh() {
+  if (core.getBooleanInput('self-hosted')) {
+    return;
+  }
+
   let sshHomeDir = `${process.env['HOME']}/.ssh`
 
   if (!fs.existsSync(sshHomeDir)) {
