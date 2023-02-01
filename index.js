@@ -74,15 +74,15 @@ async function dep() {
       if (lock['packages']) {
         version = lock['packages']
           .find(p => p.name === 'deployer/deployer')
-          .version
+          ?.version
       }
       if (version === '' && lock['packages-dev']) {
         version = lock['packages-dev']
           .find(p => p.name === 'deployer/deployer')
-          .version
+          ?.version
       }
     }
-    if (version === '') {
+    if (version === '' || typeof version === 'undefined') {
       throw new Error('Deployer binary not found. Please specify deployer-binary or deployer-version.')
     }
     version = version.replace(/^v/, '')
