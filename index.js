@@ -1,5 +1,5 @@
 import core from '@actions/core'
-import { $, fs } from 'zx'
+import { $, fs, cd } from 'zx'
 
 void async function main() {
   try {
