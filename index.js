@@ -52,6 +52,11 @@ async function ssh() {
 
 async function dep() {
   let dep = core.getInput('deployer-binary')
+  let subDirectory = core.getInput('sub-directory').trim()
+
+  if (subDirectory !== '') {
+    cd(subDirectory)
+  }
 
   if (dep === '')
     for (let c of ['vendor/bin/deployer.phar', 'vendor/bin/dep', 'deployer.phar']) {
