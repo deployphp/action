@@ -18,6 +18,10 @@
       # `deploy all`.
       # Required.
       dep: deploy
+
+      # Specifies a sub directory within the repository to deploy
+      # Optional
+      sub-directory: "..."
       
       # Config options for the Deployer. Same as the `-o` flag in the CLI.
       # Optional.

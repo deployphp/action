@@ -8,6 +8,11 @@ inputs:
     required: true
     description: The command.
 
+  sub-directory:
+    required: false
+    default: ''
+    description: Specifies a sub directory within the repository to deploy.
+
   options:
     required: false
     default: ''
