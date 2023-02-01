@@ -76,7 +76,7 @@ async function dep() {
           .find(p => p.name === 'deployer/deployer')
           ?.version
       }
-      if (version === '' && lock['packages-dev']) {
+      if ((version === '' || typeof version === 'undefined') && lock['packages-dev']) {
         version = lock['packages-dev']
           .find(p => p.name === 'deployer/deployer')
           ?.version
