@@ -24,9 +24,12 @@
       sub-directory: "..."
       
       # Config options for the Deployer. Same as the `-o` flag in the CLI.
+      # Must be a JSON object.
       # Optional.
-      options:
-        keep_releases: 7
+      options: |
+        {
+          "keep_releases": 7
+        }
 
       # Private key for connecting to remote hosts. To generate private key:
       # `ssh-keygen -o -t rsa -C 'action@deployer.org'`.

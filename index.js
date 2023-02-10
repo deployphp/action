@@ -110,7 +110,7 @@ async function dep() {
   let verbosity = core.getInput('verbosity')
   let options = []
   try {
-    for (let [key, value] in Object.entries(JSON.parse(core.getInput('options')))) {
+    for (let [key, value] of Object.entries(JSON.parse(core.getInput('options')))) {
       options.push('-o', `${key}=${value}`)
     }
   } catch (e) {
