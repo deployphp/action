@@ -8,9 +8,9 @@ This package contains type definitions for fs-extra (https://github.com/jprichar
 Files were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/fs-extra.
 
 ### Additional Details
- * Last updated: Tue, 21 Sep 2021 19:02:14 GMT
- * Dependencies: [@types/node](https://npmjs.com/package/@types/node)
+ * Last updated: Tue, 10 Jan 2023 19:32:54 GMT
+ * Dependencies: [@types/jsonfile](https://npmjs.com/package/@types/jsonfile), [@types/node](https://npmjs.com/package/@types/node)
  * Global values: none
 
 # Credits
-These definitions were written by [Alan Agius](https://github.com/alan-agius4), [midknight41](https://github.com/midknight41), [Brendan Forster](https://github.com/shiftkey), [Mees van Dijk](https://github.com/mees-), [Justin Rockwood](https://github.com/jrockwood), [Sang Dang](https://github.com/sangdth), [Florian Keller](https://github.com/ffflorian), [Piotr Błażejewicz](https://github.com/peterblazejewicz), and [Tiger Oakes](https://github.com/NotWoods).
+These definitions were written by [Alan Agius](https://github.com/alan-agius4), [midknight41](https://github.com/midknight41), [Brendan Forster](https://github.com/shiftkey), [Mees van Dijk](https://github.com/mees-), [Justin Rockwood](https://github.com/jrockwood), [Sang Dang](https://github.com/sangdth), [Florian Keller](https://github.com/ffflorian), [Piotr Błażejewicz](https://github.com/peterblazejewicz), [Tiger Oakes](https://github.com/NotWoods), and [BendingBender](https://github.com/BendingBender).

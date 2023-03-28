@@ -5,7 +5,7 @@ Node.js: fs-extra
 
 [![npm Package](https://img.shields.io/npm/v/fs-extra.svg)](https://www.npmjs.org/package/fs-extra)
 [![License](https://img.shields.io/npm/l/fs-extra.svg)](https://github.com/jprichardson/node-fs-extra/blob/master/LICENSE)
-[![build status](https://img.shields.io/github/workflow/status/jprichardson/node-fs-extra/Node.js%20CI/master)](https://github.com/jprichardson/node-fs-extra/actions/workflows/ci.yml?query=branch%3Amaster)
+[![build status](https://img.shields.io/github/actions/workflow/status/jprichardson/node-fs-extra/ci.yml?branch=master)](https://github.com/jprichardson/node-fs-extra/actions/workflows/ci.yml?query=branch%3Amaster)
 [![downloads per month](http://img.shields.io/npm/dm/fs-extra.svg)](https://www.npmjs.org/package/fs-extra)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -26,6 +26,8 @@ Installation
 
 Usage
 -----
+
+### CommonJS
 
 `fs-extra` is a drop in replacement for native `fs`. All methods in `fs` are attached to `fs-extra`. All `fs` methods return promises if the callback isn't passed.
 
@@ -53,6 +55,31 @@ you can also keep both, but it's redundant:
 ```js
 const fs = require('fs')
 const fse = require('fs-extra')
+```
+
+### ESM
+
+There is also an `fs-extra/esm` import, that supports both default and named exports. However, note that `fs` methods are not included in `fs-extra/esm`; you still need to import `fs` and/or `fs/promises` seperately:
+
+```js
+import { readFileSync } from 'fs'
+import { readFile } from 'fs/promises'
+import { outputFile, outputFileSync } from 'fs-extra/esm'
+```
+
+Default exports are supported:
+
+```js
+import fs from 'fs'
+import fse from 'fs-extra/esm'
+// fse.readFileSync is not a function; must use fs.readFileSync
+```
+
+but you probably want to just use regular `fs-extra` instead of `fs-extra/esm` for default exports:
+
+```js
+import fs from 'fs-extra'
+// both fs and fs-extra methods are defined
 ```
 
 Sync vs Async vs Async/Await
@@ -197,7 +224,10 @@ fs-extra contains hundreds of tests.
 
 - `npm run lint`: runs the linter ([standard](http://standardjs.com/))
 - `npm run unit`: runs the unit tests
-- `npm test`: runs both the linter and the tests
+- `npm run unit-esm`: runs tests for `fs-extra/esm` exports
+- `npm test`: runs the linter and all tests
+
+When running unit tests, set the environment variable `CROSS_DEVICE_PATH` to the absolute path of an empty directory on another device (like a thumb drive) to enable cross-device move tests.
 
 
 ### Windows

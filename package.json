@@ -3,7 +3,7 @@
   "type": "module",
   "dependencies": {
     "@actions/core": "^1.10.0",
-    "zx": "^7.1.1"
+    "zx": "^7.2.1"
   },
   "engines": {
     "node": ">=16"

@@ -1,6 +1,6 @@
 {
     "name": "@types/fs-extra",
-    "version": "9.0.13",
+    "version": "11.0.1",
     "description": "TypeScript definitions for fs-extra",
     "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/fs-extra",
     "license": "MIT",
@@ -49,6 +49,11 @@
             "name": "Tiger Oakes",
             "url": "https://github.com/NotWoods",
             "githubUsername": "NotWoods"
+        },
+        {
+            "name": "BendingBender",
+            "url": "https://github.com/BendingBender",
+            "githubUsername": "BendingBender"
         }
     ],
     "main": "",
@@ -60,8 +65,20 @@
     },
     "scripts": {},
     "dependencies": {
+        "@types/jsonfile": "*",
         "@types/node": "*"
     },
-    "typesPublisherContentHash": "75e10d16a18d936a50e54414024604aa9484e8345b37c2027921869f254523ee",
-    "typeScriptVersion": "3.9"
+    "typesPublisherContentHash": "9244941e71bf5edda5456eb8aee9bd3d796ad970d74fb7991788553ac18c5d83",
+    "typeScriptVersion": "4.5",
+    "exports": {
+        ".": {
+            "types": "./index.d.ts"
+        },
+        "./esm": {
+            "types": {
+                "import": "./esm.d.mts"
+            }
+        },
+        "./package.json": "./package.json"
+    }
 }
