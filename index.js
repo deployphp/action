@@ -109,12 +109,16 @@ async function dep() {
   let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
   let verbosity = core.getInput('verbosity')
   let options = []
-  try {
-    for (let [key, value] in Object.entries(JSON.parse(core.getInput('options')))) {
-      options.push('-o', `${key}=${value}`)
+  let optionsInput = core.getInput('options');
+
+  if (optionsInput !== '') {
+    try {
+      for (let [key, value] in Object.entries(JSON.parse(optionsInput))) {
+        options.push('-o', `${key}=${value}`)
+      }
+    } catch (e) {
+      throw new Error('Invalid JSON in options')
     }
-  } catch (e) {
-    throw new Error('Invalid JSON in options')
   }
 
   try {
