@@ -106,6 +106,11 @@ async function dep() {
   }
 
   let cmd = core.getInput('dep').split(' ')
+  let recipe = core.getInput('recipe')
+  if (recipe !== '') {
+    recipe = `--file=${recipe}`
+  }
+
   let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
   let verbosity = core.getInput('verbosity')
   let options = []
@@ -121,7 +126,7 @@ async function dep() {
     }
 
   try {
-    await $`php ${dep} ${cmd} --no-interaction ${ansi} ${verbosity} ${options}`
+    await $`php ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }
