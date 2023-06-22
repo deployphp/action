@@ -117,13 +117,13 @@ async function dep() {
   try {
     let optionsArg = core.getInput('options')
     if (optionsArg !== '') {
-        for (let [key, value] in Object.entries(JSON.parse(optionsArg))) {
-          options.push('-o', `${key}=${value}`)
-        }
-      } catch (e) {
-        console.error('Invalid JSON in options')
+      for (let [key, value] in Object.entries(JSON.parse(optionsArg))) {
+        options.push('-o', `${key}=${value}`)
       }
     }
+  } catch (e) {
+    console.error('Invalid JSON in options')
+  }
 
   try {
     await $`php ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
