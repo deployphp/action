@@ -94,7 +94,7 @@ async function dep() {
         break
       }
     }
-    if (url === null) {
+    if (url === 'undefined') {
       console.error(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
     } else {
       console.log(`Downloading "${url}".`)
