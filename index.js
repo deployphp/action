@@ -95,7 +95,7 @@ async function dep() {
       }
     }
     if (typeof url === 'undefined') {
-      throw new Error(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
+      core.setFailed(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
     } else {
       console.log(`Downloading "${url}".`)
       await $`curl -LO ${url}`
@@ -106,24 +106,26 @@ async function dep() {
   }
 
   let cmd = core.getInput('dep').split(' ')
+  let recipe = core.getInput('recipe')
+  if (recipe !== '') {
+    recipe = `--file=${recipe}`
+  }
+
   let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
   let verbosity = core.getInput('verbosity')
   let options = []
-  let optionsInput = core.getInput('options');
-
-  if (optionsInput !== '') {
-    try {
-      for (let [key, value] in Object.entries(JSON.parse(optionsInput))) {
+  try {
+    let optionsArg = core.getInput('options')
+    if (optionsArg !== '') {
+      for (let [key, value] in Object.entries(JSON.parse(optionsArg))) {
         options.push('-o', `${key}=${value}`)
       }
-    } catch (e) {
-      throw new Error('Invalid JSON in options')
     }
   }
 
   try {
-    await $`php ${dep} ${cmd} --no-interaction ${ansi} ${verbosity} ${options}`
+    await $`php ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
   } catch (err) {
-    throw new Error(`Failed: dep ${cmd}`)
+    core.setFailed(`Failed: dep ${cmd}`)
   }
 }
