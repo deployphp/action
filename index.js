@@ -94,8 +94,8 @@ async function dep() {
         break
       }
     }
-    if (url === null) {
-      console.error(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
+    if (typeof url === 'undefined') {
+      core.setFailed(`The version "${version}"" does not exist in the "https://deployer.org/manifest.json" file."`)
     } else {
       console.log(`Downloading "${url}".`)
       await $`curl -LO ${url}`
