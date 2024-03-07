@@ -121,6 +121,8 @@ async function dep() {
         options.push('-o', `${key}=${value}`)
       }
     }
+  } catch (e) {
+    console.error('Invalid JSON in options')
   }
 
   try {
