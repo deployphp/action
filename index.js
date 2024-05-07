@@ -124,9 +124,15 @@ async function dep() {
   } catch (e) {
     console.error('Invalid JSON in options')
   }
+  
+  let phpBin = 'php'
+  let phpBinArg = core.getInput('php-binary');
+    if (phpBinArg !== '') {
+        phpBin = phpBinArg
+    }
 
   try {
-    await $`php ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
+    await $`${phpBin} ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }
