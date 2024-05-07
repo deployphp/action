@@ -7,6 +7,11 @@ inputs:
   dep:
     required: true
     description: The command.
+    
+  php-binary:
+    required: false
+    default: ''
+    description: Path to PHP binary.
 
   sub-directory:
     required: false
