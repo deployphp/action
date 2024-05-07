@@ -18,6 +18,10 @@
       # `deploy all`.
       # Required.
       dep: deploy
+      
+      # The path to the PHP binary to use.
+      # Optional.
+      php-binary: "php"
 
       # Specifies a sub directory within the repository to deploy
       # Optional
