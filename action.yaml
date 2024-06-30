@@ -22,6 +22,7 @@ inputs:
     required: false
     default: ''
     description: List of options for the Deployer.
+    deprecationMessage: Please pass options with the "-o option=value" syntax to the "dep" command.
 
   private-key:
     required: false
