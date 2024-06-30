@@ -33,11 +33,6 @@
       # Specifies a sub directory within the repository to deploy
       # Optional
       sub-directory: "..."
-      
-      # Config options for the Deployer. Same as the `-o` flag in the CLI.
-      # Optional.
-      options:
-        keep_releases: 7
 
       # Private key for connecting to remote hosts. To generate private key:
       # `ssh-keygen -o -t rsa -C 'action@deployer.org'`.
@@ -116,6 +111,6 @@ jobs:
       - name: Deploy
         uses: deployphp/action@v1
         with:
-          dep: deploy
+          dep: deploy -o keep_releases=7
           private-key: ${{ secrets.PRIVATE_KEY }}
 ```
