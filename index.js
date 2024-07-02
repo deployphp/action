@@ -1,5 +1,6 @@
 import core from '@actions/core'
 import { $, fs, cd } from 'zx'
+import * as yaml from 'js-yaml'
 
 void async function main() {
   try {
@@ -113,16 +114,16 @@ async function dep() {
 
   let ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
   let verbosity = core.getInput('verbosity')
-  let options = []
+  const options = []
   try {
     let optionsArg = core.getInput('options')
     if (optionsArg !== '') {
-      for (let [key, value] in Object.entries(JSON.parse(optionsArg))) {
+      for (let [key, value] in Object.entries(yaml.load(optionsArg))) {
         options.push('-o', `${key}=${value}`)
       }
     }
   } catch (e) {
-    console.error('Invalid JSON in options')
+    console.error('Invalid YAML in options')
   }
   
   let phpBin = 'php'
@@ -132,7 +133,7 @@ async function dep() {
     }
 
   try {
-    await $`${phpBin} ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
+    await $`${phpBin} ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options.join(' ')}`
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }

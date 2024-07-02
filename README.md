@@ -35,8 +35,9 @@
       sub-directory: "..."
       
       # Config options for the Deployer. Same as the `-o` flag in the CLI.
+      # The | is very important here!
       # Optional.
-      options:
+      options: |
         keep_releases: 7
 
       # Private key for connecting to remote hosts. To generate private key:
