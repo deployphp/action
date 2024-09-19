@@ -21,11 +21,17 @@ async function ssh() {
     fs.mkdirSync(sshHomeDir)
   }
 
-  await $`eval \`ssh-agent\``
+  const sshAgentOutput = await $`ssh-agent`
 
-  const sshAgentSocket = await $`echo \$SSH_AUTH_SOCKET`
+  const sshAgentSocket = sshAgentOutput
+    .stdout
+    .match(/SSH_AUTH_SOCK=(?<path>.*); export SSH_AUTH_SOCK;/)
+    ?.groups['path'] ?? null;
 
-  const sshAgentProcessId = await $`echo \$SSH_AGENT_PID`
+  const sshAgentProcessId = sshAgentOutput
+    .stdout
+    .match(/SSH_AGENT_PID=(?<pid>\d+); export SSH_AGENT_PID;/)
+    ?.groups['pid'] ?? null;
 
   if (!sshAgentSocket || !sshAgentProcessId) {
     throw new Error('Failed to start ssh-agent')
