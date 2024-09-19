@@ -14,7 +14,9 @@ async function cleanup() {
     return
   }
 
+  const sshAgentPid = core.getState('ssh-agent-pid')
+
   // Remove all keys from ssh-agent and kill process
   await $`ssh-add -D`
-  await $`kill \$SSH_AGENT_PID`
+  await $`kill ${sshAgentPid}`
 }

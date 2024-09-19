@@ -38,7 +38,9 @@ async function ssh() {
   }
 
   core.exportVariable('SSH_AUTH_SOCK', sshAgentSocket.trim())
-  core.exportVariable('SSH_AGENT_PID', sshAgentProcessId.trim())
+  core.exportVariable('SSH_AGENT_PID', )
+
+  core.saveState('ssh-agent-pid', sshAgentProcessId.trim())
 
   let privateKey = core.getInput('private-key')
   if (privateKey !== '') {
