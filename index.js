@@ -21,6 +21,9 @@ async function ssh() {
     fs.mkdirSync(sshHomeDir)
   }
 
+  // Unfortunately running the output into bash or eval-ing it does
+  // not persist the exported environment variables, so instead we
+  // parse out the variables via regex, not ideal but works a treat.
   const sshAgentOutput = await $`ssh-agent`
 
   const sshAgentSocket = sshAgentOutput
@@ -38,7 +41,7 @@ async function ssh() {
   }
 
   core.exportVariable('SSH_AUTH_SOCK', sshAgentSocket.trim())
-  core.exportVariable('SSH_AGENT_PID', )
+  core.exportVariable('SSH_AGENT_PID', sshAgentProcessId.trim())
 
   core.saveState('ssh-agent-pid', sshAgentProcessId.trim())
 
