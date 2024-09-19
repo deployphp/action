@@ -33,6 +33,11 @@ inputs:
     default: ''
     description: Content of `~/.ssh/known_hosts` file.
 
+  disable-strict-host-checking:
+    required: false
+    default: 'true'
+    description: Disable Strict Host Checking if no known_hosts are provided
+
   ssh-config:
     required: false
     default: ''
@@ -71,6 +76,7 @@ inputs:
 runs:
   using: 'node20'
   main: 'index.js'
+  post: 'cleanup.js'
 
 branding:
   color: blue

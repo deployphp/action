@@ -15,15 +15,24 @@ async function ssh() {
     return
   }
 
-  let sshHomeDir = `${process.env['HOME']}/.ssh`
+  const sshHomeDir = `${process.env['HOME']}/.ssh`
 
   if (!fs.existsSync(sshHomeDir)) {
     fs.mkdirSync(sshHomeDir)
   }
 
-  let authSock = '/tmp/ssh-auth.sock'
-  await $`ssh-agent -a ${authSock}`
-  core.exportVariable('SSH_AUTH_SOCK', authSock)
+  await $`eval \`ssh-agent\``
+
+  const sshAgentSocket = await $`echo \$SSH_AUTH_SOCKET`
+
+  const sshAgentProcessId = await $`echo \$SSH_AGENT_PID`
+
+  if (!sshAgentSocket || !sshAgentProcessId) {
+    throw new Error('Failed to start ssh-agent')
+  }
+
+  core.exportVariable('SSH_AUTH_SOCK', sshAgentSocket.trim())
+  core.exportVariable('SSH_AGENT_PID', sshAgentProcessId.trim())
 
   let privateKey = core.getInput('private-key')
   if (privateKey !== '') {
@@ -39,8 +48,10 @@ async function ssh() {
     fs.appendFileSync(`${sshHomeDir}/known_hosts`, knownHosts)
     fs.chmodSync(`${sshHomeDir}/known_hosts`, '600')
   } else {
-    fs.appendFileSync(`${sshHomeDir}/config`, `StrictHostKeyChecking no`)
-    fs.chmodSync(`${sshHomeDir}/config`, '600')
+    if (core.getBooleanInput('disable-strict-host-checking')) {
+      fs.appendFileSync(`${sshHomeDir}/config`, `StrictHostKeyChecking no`)
+      fs.chmodSync(`${sshHomeDir}/config`, '600')
+    }
   }
 
   let sshConfig = core.getInput('ssh-config')
