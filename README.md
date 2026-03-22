@@ -18,7 +18,7 @@
       # `deploy all`.
       # Required.
       dep: deploy
-      
+
       # The path to the PHP binary to use.
       # Optional.
       php-binary: "php"
@@ -26,7 +26,7 @@
       # Specifies a sub directory within the repository to deploy
       # Optional
       sub-directory: "..."
-      
+
       # Config options for the Deployer. Same as the `-o` flag in the CLI.
       # Optional.
       options:
@@ -50,13 +50,13 @@
       # Optional.
       ssh-config: |
         ...
-        
+
       # Option to skip over the SSH setup/configuration.
       # Self-hosted runners don't need the SSH configuration or the SSH agent 
       # to be started.
       # Optional.
       skip-ssh-setup: false        
-    
+
       # Deployer version to download from deployer.org.
       # First, the action will check for Deployer binary at those paths:
       # - `vendor/bin/deployer.phar`
@@ -78,6 +78,10 @@
       # You can specify the output verbosity level.
       # Optional. Defaults to -v.
       verbosity: -vvv
+
+      # The branch to deploy. Adds --branch=value to the deploy command.
+      # Optional.
+      branch: "main"
 ```
 
 ## Example

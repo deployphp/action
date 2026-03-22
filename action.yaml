@@ -7,7 +7,7 @@ inputs:
   dep:
     required: true
     description: The command.
-    
+
   php-binary:
     required: false
     default: ''
@@ -67,6 +67,11 @@ inputs:
     required: false
     default: '-v'
     description: Verbosity level Can be -v, -vv or -vvv.
+
+  branch:
+    required: false
+    default: ''
+    description: The branch to deploy.
 
 runs:
   using: 'node24'

@@ -124,15 +124,18 @@ async function dep() {
   } catch (e) {
     console.error('Invalid JSON in options')
   }
-  
+
   let phpBin = 'php'
   let phpBinArg = core.getInput('php-binary');
     if (phpBinArg !== '') {
         phpBin = phpBinArg
     }
 
+  let branch = core.getInput('branch')
+  let branchOption = branch !== '' ? `--branch=${branch}` : ''
+
   try {
-    await $`${phpBin} ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
+    await $`${phpBin} ${dep} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options} ${branchOption}`
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }
