@@ -15,15 +15,35 @@ async function ssh() {
     return
   }
 
-  let sshHomeDir = `${process.env['HOME']}/.ssh`
+  const sshHomeDir = `${process.env['HOME']}/.ssh`
 
   if (!fs.existsSync(sshHomeDir)) {
     fs.mkdirSync(sshHomeDir)
   }
 
-  let authSock = '/tmp/ssh-auth.sock'
-  await $`ssh-agent -a ${authSock}`
-  core.exportVariable('SSH_AUTH_SOCK', authSock)
+  // Unfortunately running the output into bash or eval-ing it does
+  // not persist the exported environment variables, so instead we
+  // parse out the variables via regex, not ideal but works a treat.
+  const sshAgentOutput = await $`ssh-agent`
+
+  const sshAgentSocket = sshAgentOutput
+    .stdout
+    .match(/SSH_AUTH_SOCK=(?<path>.*); export SSH_AUTH_SOCK;/)
+    ?.groups['path'] ?? null;
+
+  const sshAgentProcessId = sshAgentOutput
+    .stdout
+    .match(/SSH_AGENT_PID=(?<pid>\d+); export SSH_AGENT_PID;/)
+    ?.groups['pid'] ?? null;
+
+  if (!sshAgentSocket || !sshAgentProcessId) {
+    throw new Error('Failed to start ssh-agent')
+  }
+
+  core.exportVariable('SSH_AUTH_SOCK', sshAgentSocket.trim())
+  core.exportVariable('SSH_AGENT_PID', sshAgentProcessId.trim())
+
+  core.saveState('ssh-agent-pid', sshAgentProcessId.trim())
 
   let privateKey = core.getInput('private-key')
   if (privateKey !== '') {
@@ -39,8 +59,10 @@ async function ssh() {
     fs.appendFileSync(`${sshHomeDir}/known_hosts`, knownHosts)
     fs.chmodSync(`${sshHomeDir}/known_hosts`, '600')
   } else {
-    fs.appendFileSync(`${sshHomeDir}/config`, `StrictHostKeyChecking no`)
-    fs.chmodSync(`${sshHomeDir}/config`, '600')
+    if (core.getBooleanInput('disable-strict-host-checking')) {
+      fs.appendFileSync(`${sshHomeDir}/config`, `StrictHostKeyChecking no`)
+      fs.chmodSync(`${sshHomeDir}/config`, '600')
+    }
   }
 
   let sshConfig = core.getInput('ssh-config')
