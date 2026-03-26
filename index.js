@@ -1,5 +1,5 @@
 import core from '@actions/core'
-import { $, fs, cd } from 'zx'
+import { $, fs, cd, fetch } from 'zx'
 
 void async function main() {
   try {
@@ -86,7 +86,12 @@ async function dep() {
       throw new Error('Deployer binary not found. Please specify deployer-binary or deployer-version.')
     }
     version = version.replace(/^v/, '')
-    let manifest = JSON.parse((await $`curl -L https://deployer.org/manifest.json`).stdout)
+    const response = await fetch(`https://deployer.org/manifest.json`)
+    if (!response.ok) {
+      const body = await response.text()
+      throw new Error(`Manifest can be downloaded. ${response.status} ${body}`)
+    }
+    let manifest = await response.json()
     let url
     for (let asset of manifest) {
       if (asset.version === version) {
@@ -124,7 +129,7 @@ async function dep() {
   } catch (e) {
     console.error('Invalid JSON in options')
   }
-  
+
   let phpBin = 'php'
   let phpBinArg = core.getInput('php-binary');
     if (phpBinArg !== '') {
