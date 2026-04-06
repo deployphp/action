@@ -19,7 +19,7 @@ export default defineConfig({
     emptyOutDir: true,
   },
   ssr: {
-    noExternal: ['zx', '@actions/core'],
+    noExternal: [/./],
     target: 'node',
   },
 })
