@@ -69,7 +69,11 @@ async function dep(): Promise<void> {
   }
 
   if (bin === '') {
-    for (const c of ['vendor/bin/deployer.phar', 'vendor/bin/dep', 'deployer.phar']) {
+    for (const c of [
+      'vendor/bin/deployer.phar',
+      'vendor/bin/dep',
+      'deployer.phar',
+    ]) {
       if (fs.existsSync(c)) {
         bin = c
         console.log(`Using "${c}".`)
@@ -81,16 +85,24 @@ async function dep(): Promise<void> {
   if (bin === '') {
     let version: string | undefined = core.getInput('deployer-version')
     if (version === '' && fs.existsSync('composer.lock')) {
-      const lock: ComposerLock = JSON.parse(fs.readFileSync('composer.lock', 'utf8'))
+      const lock: ComposerLock = JSON.parse(
+        fs.readFileSync('composer.lock', 'utf8'),
+      )
       if (lock.packages) {
-        version = lock.packages.find((p) => p.name === 'deployer/deployer')?.version
+        version = lock.packages.find(
+          (p) => p.name === 'deployer/deployer',
+        )?.version
       }
       if ((version === '' || version === undefined) && lock['packages-dev']) {
-        version = lock['packages-dev'].find((p) => p.name === 'deployer/deployer')?.version
+        version = lock['packages-dev'].find(
+          (p) => p.name === 'deployer/deployer',
+        )?.version
       }
     }
     if (version === '' || version === undefined) {
-      throw new Error('Deployer binary not found. Please specify deployer-binary or deployer-version.')
+      throw new Error(
+        'Deployer binary not found. Please specify deployer-binary or deployer-version.',
+      )
     }
     version = version.replace(/^v/, '')
     const manifest: DeployerManifestEntry[] = JSON.parse(

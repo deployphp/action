@@ -1,4 +1,4 @@
-name: Test
+name: Typecheck
 on:
   pull_request:
   push:
@@ -7,11 +7,13 @@ on:
       - 'releases/*'
 
 jobs:
-  test:
+  typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./
+      - uses: actions/setup-node@v4
         with:
-          dep: list
-          deployer-version: '7.3.0'
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck

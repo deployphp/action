@@ -1,4 +1,4 @@
-name: Test
+name: Zizmor
 on:
   pull_request:
   push:
@@ -7,11 +7,13 @@ on:
       - 'releases/*'
 
 jobs:
-  test:
+  zizmor:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./
         with:
-          dep: list
-          deployer-version: '7.3.0'
+          persist-credentials: false
+      - uses: woodruffw/zizmor-action@v2

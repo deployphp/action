@@ -3,11 +3,10 @@ name: 'deployphp/action'
 description: 'Deploy with Deployer'
 
 inputs:
-
   dep:
     required: true
     description: The command.
-    
+
   php-binary:
     required: false
     default: ''
