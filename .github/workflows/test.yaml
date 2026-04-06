@@ -1,0 +1,37 @@
+name: 'build-test'
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Check dist/ is up to date
+        run: |
+          if [ "$(git diff --name-only dist/)" != "" ]; then
+            echo "dist/ is out of date. Run 'npm run build' and commit the result."
+            git diff dist/
+            exit 1
+          fi
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          dep: list
+          deployer-version: "7.3.0"
