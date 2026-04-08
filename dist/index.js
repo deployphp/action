@@ -36631,6 +36631,7 @@ var import_build = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((expo
 var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, minimist, nothrow, parseArgv, question, quiet, retry, sleep, spinner, stdin, tempdir, tempfile, tmpdir, tmpfile, updateArgv, version, versions, $, Fail, ProcessOutput, ProcessPromise, bus, cd, chalk, defaults, kill, log, os: os$1, path, ps, quote, quotePowerShell, resolveDefaults, syncProcessCwd, useBash, usePowerShell, usePwsh, which, within } = globalThis.Deno ? globalThis.require("./index.cjs") : import_build;
 //#endregion
 //#region src/index.ts
+$.verbose = true;
 (async function main() {
 	try {
 		await ssh();
@@ -36707,10 +36708,13 @@ async function dep() {
 		bin = "deployer.phar";
 	}
 	const cmd = getInput("dep").split(" ");
-	let recipe = getInput("recipe");
-	if (recipe !== "") recipe = `--file=${recipe}`;
+	const recipeArgs = [];
+	const recipeInput = getInput("recipe");
+	if (recipeInput !== "") recipeArgs.push(`--file=${recipeInput}`);
 	const ansi = getBooleanInput("ansi") ? "--ansi" : "--no-ansi";
-	const verbosity = getInput("verbosity");
+	const verbosityArgs = [];
+	const verbosityInput = getInput("verbosity");
+	if (verbosityInput !== "") verbosityArgs.push(verbosityInput);
 	const options = [];
 	try {
 		const optionsArg = getInput("options");
@@ -36722,7 +36726,7 @@ async function dep() {
 	const phpBinArg = getInput("php-binary");
 	if (phpBinArg !== "") phpBin = phpBinArg;
 	try {
-		await $`${phpBin} ${bin} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`;
+		await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`;
 	} catch (err) {
 		setFailed(`Failed: dep ${cmd}`);
 	}
