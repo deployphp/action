@@ -1,6 +1,8 @@
 import * as core from '@actions/core'
 import { $, fs, cd } from 'zx'
 
+$.verbose = true
+
 interface ComposerLock {
   packages?: Array<{ name: string; version: string }>
   'packages-dev'?: Array<{ name: string; version: string }>
@@ -129,13 +131,18 @@ async function dep(): Promise<void> {
   }
 
   const cmd = core.getInput('dep').split(' ')
-  let recipe = core.getInput('recipe')
-  if (recipe !== '') {
-    recipe = `--file=${recipe}`
+  const recipeArgs: string[] = []
+  const recipeInput = core.getInput('recipe')
+  if (recipeInput !== '') {
+    recipeArgs.push(`--file=${recipeInput}`)
   }
 
   const ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
-  const verbosity = core.getInput('verbosity')
+  const verbosityArgs: string[] = []
+  const verbosityInput = core.getInput('verbosity')
+  if (verbosityInput !== '') {
+    verbosityArgs.push(verbosityInput)
+  }
   const options: string[] = []
   try {
     const optionsArg = core.getInput('options')
@@ -155,7 +162,7 @@ async function dep(): Promise<void> {
   }
 
   try {
-    await $`${phpBin} ${bin} ${cmd} ${recipe} --no-interaction ${ansi} ${verbosity} ${options}`
+    await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }
