@@ -36693,7 +36693,9 @@ async function dep() {
 		}
 		if (version === "" || version === void 0) throw new Error("Deployer binary not found. Please specify deployer-binary or deployer-version.");
 		version = version.replace(/^v/, "");
-		const manifest = JSON.parse((await $`curl -L https://deployer.org/manifest.json`).stdout);
+		const manifestPath = `${process.env["RUNNER_TEMP"] ?? "."}/deployer-manifest.json`;
+		await $`curl -fsSL -o ${manifestPath} https://deployer.org/manifest.json`;
+		const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 		let url;
 		for (const asset of manifest) if (asset.version === version) {
 			url = asset.url;
