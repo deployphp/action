@@ -48,7 +48,7 @@ async function ssh(): Promise<void> {
 
   const knownHosts = core.getInput('known-hosts')
   if (knownHosts !== '') {
-    fs.appendFileSync(`${sshHomeDir}/known_hosts`, knownHosts)
+    fs.writeFileSync(`${sshHomeDir}/known_hosts`, knownHosts)
     fs.chmodSync(`${sshHomeDir}/known_hosts`, '600')
   } else {
     fs.appendFileSync(`${sshHomeDir}/config`, `StrictHostKeyChecking no`)
