@@ -164,6 +164,7 @@ async function dep(): Promise<void> {
   try {
     await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`
   } catch (err) {
-    core.setFailed(`Failed: dep ${cmd}`)
+    const message = err instanceof Error ? err.message : String(err)
+    core.setFailed(`Failed: dep ${cmd.join(' ')}\n${message}`)
   }
 }
