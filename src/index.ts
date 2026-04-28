@@ -107,8 +107,10 @@ async function dep(): Promise<void> {
       )
     }
     version = version.replace(/^v/, '')
+    const manifestPath = `${process.env['RUNNER_TEMP'] ?? '.'}/deployer-manifest.json`
+    await $`curl -fsSL -o ${manifestPath} https://deployer.org/manifest.json`
     const manifest: DeployerManifestEntry[] = JSON.parse(
-      (await $`curl -L https://deployer.org/manifest.json`).stdout,
+      fs.readFileSync(manifestPath, 'utf8'),
     )
     let url: string | undefined
     for (const asset of manifest) {
