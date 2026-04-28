@@ -36644,7 +36644,7 @@ async function ssh() {
 	if (getBooleanInput("skip-ssh-setup")) return;
 	const sshHomeDir = `${process.env["HOME"]}/.ssh`;
 	if (!fs.existsSync(sshHomeDir)) fs.mkdirSync(sshHomeDir);
-	const authSock = "/tmp/ssh-auth.sock";
+	const authSock = `${process.env["RUNNER_TEMP"] ?? "/tmp"}/ssh-auth-${process.pid}.sock`;
 	await $`ssh-agent -a ${authSock}`;
 	exportVariable("SSH_AUTH_SOCK", authSock);
 	let privateKey = getInput("private-key");
