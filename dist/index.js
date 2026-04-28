@@ -36644,9 +36644,13 @@ async function ssh() {
 	if (getBooleanInput("skip-ssh-setup")) return;
 	const sshHomeDir = `${process.env["HOME"]}/.ssh`;
 	if (!fs.existsSync(sshHomeDir)) fs.mkdirSync(sshHomeDir);
-	const authSock = "/tmp/ssh-auth.sock";
-	await $`ssh-agent -a ${authSock}`;
-	exportVariable("SSH_AUTH_SOCK", authSock);
+	const existingAuthSock = process.env["SSH_AUTH_SOCK"];
+	if (existingAuthSock !== void 0 && existingAuthSock !== "" && fs.existsSync(existingAuthSock)) console.log(`Using existing SSH agent socket at ${existingAuthSock}.`);
+	else {
+		const authSock = "/tmp/ssh-auth.sock";
+		await $`ssh-agent -a ${authSock}`;
+		exportVariable("SSH_AUTH_SOCK", authSock);
+	}
 	let privateKey = getInput("private-key");
 	if (privateKey !== "") {
 		privateKey = privateKey.replace(/\r/g, "").trim() + "\n";
