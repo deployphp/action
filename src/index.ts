@@ -13,12 +13,20 @@ interface DeployerManifestEntry {
   url: string
 }
 
+function formatError(err: unknown): string {
+  if (err instanceof Error) {
+    return err.stack ?? err.message
+  }
+
+  return String(err)
+}
+
 void (async function main(): Promise<void> {
   try {
     await ssh()
     await dep()
   } catch (err) {
-    core.setFailed(err instanceof Error ? err.message : String(err))
+    core.setFailed(formatError(err))
   }
 })()
 
