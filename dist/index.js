@@ -36632,12 +36632,16 @@ var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, mi
 //#endregion
 //#region src/index.ts
 $.verbose = true;
+function formatError(err) {
+	if (err instanceof Error) return err.stack ?? err.message;
+	return String(err);
+}
 (async function main() {
 	try {
 		await ssh();
 		await dep();
 	} catch (err) {
-		setFailed(err instanceof Error ? err.message : String(err));
+		setFailed(formatError(err));
 	}
 })();
 async function ssh() {
