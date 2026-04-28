@@ -36632,6 +36632,23 @@ var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, mi
 //#endregion
 //#region src/index.ts
 $.verbose = true;
+function parseOptions(input) {
+	if (input.trim() === "") return {};
+	try {
+		return JSON.parse(input);
+	} catch {
+		const options = {};
+		for (const line of input.split("\n")) {
+			const trimmed = line.trim();
+			if (trimmed === "" || trimmed.startsWith("#")) continue;
+			const match = trimmed.match(/^([^:#]+):\s*(.*)$/);
+			if (match === null) throw new Error("Invalid options format");
+			const [, key, value] = match;
+			options[key.trim()] = value.trim().replace(/^['"]|['"]$/g, "");
+		}
+		return options;
+	}
+}
 (async function main() {
 	try {
 		await ssh();
@@ -36712,16 +36729,21 @@ async function dep() {
 	const recipeInput = getInput("recipe");
 	if (recipeInput !== "") recipeArgs.push(`--file=${recipeInput}`);
 	const ansi = getBooleanInput("ansi") ? "--ansi" : "--no-ansi";
-	const verbosityArgs = [];
-	const verbosityInput = getInput("verbosity");
-	if (verbosityInput !== "") verbosityArgs.push(verbosityInput);
 	const options = [];
+	let verbosityInput = getInput("verbosity");
 	try {
-		const optionsArg = getInput("options");
-		if (optionsArg !== "") for (const [key, value] of Object.entries(JSON.parse(optionsArg))) options.push("-o", `${key}=${value}`);
+		const parsedOptions = parseOptions(getInput("options"));
+		if (parsedOptions.verbosity !== void 0) {
+			verbosityInput = parsedOptions.verbosity;
+			delete parsedOptions.verbosity;
+		}
+		for (const [key, value] of Object.entries(parsedOptions)) options.push("-o", `${key}=${value}`);
 	} catch (e) {
-		console.error("Invalid JSON in options");
+		setFailed("Invalid options format. Use JSON or key: value lines.");
+		return;
 	}
+	const verbosityArgs = [];
+	if (verbosityInput !== "") verbosityArgs.push(verbosityInput);
 	let phpBin = "php";
 	const phpBinArg = getInput("php-binary");
 	if (phpBinArg !== "") phpBin = phpBinArg;
