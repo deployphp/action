@@ -36674,11 +36674,19 @@ async function dep() {
 	const subDirectory = getInput("sub-directory").trim();
 	if (subDirectory !== "") cd(subDirectory);
 	if (bin === "") {
-		for (const c of [
+		const candidates = [
 			"vendor/bin/deployer.phar",
 			"vendor/bin/dep",
 			"deployer.phar"
-		]) if (fs.existsSync(c)) {
+		];
+		try {
+			const composerHome = (await $`composer -n config --global home`).stdout.trim();
+			if (composerHome !== "") {
+				candidates.push(`${composerHome}/vendor/bin/deployer.phar`);
+				candidates.push(`${composerHome}/vendor/bin/dep`);
+			}
+		} catch (_) {}
+		for (const c of candidates) if (fs.existsSync(c)) {
 			bin = c;
 			console.log(`Using "${c}".`);
 			break;
