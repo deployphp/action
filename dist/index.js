@@ -36728,7 +36728,8 @@ async function dep() {
 	try {
 		await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`;
 	} catch (err) {
-		setFailed(`Failed: dep ${cmd}`);
+		const message = err instanceof Error ? err.message : String(err);
+		setFailed(`Failed: dep ${cmd.join(" ")}\n${message}`);
 	}
 }
 //#endregion
