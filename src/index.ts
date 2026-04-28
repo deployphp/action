@@ -33,7 +33,7 @@ async function ssh(): Promise<void> {
     fs.mkdirSync(sshHomeDir)
   }
 
-  const authSock = '/tmp/ssh-auth.sock'
+  const authSock = `${process.env['RUNNER_TEMP'] ?? '/tmp'}/ssh-auth-${process.pid}.sock`
   await $`ssh-agent -a ${authSock}`
   core.exportVariable('SSH_AUTH_SOCK', authSock)
 
