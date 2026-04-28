@@ -13,6 +13,33 @@ interface DeployerManifestEntry {
   url: string
 }
 
+type ParsedOptions = Record<string, string>
+
+function parseOptions(input: string): ParsedOptions {
+  if (input.trim() === '') {
+    return {}
+  }
+
+  try {
+    return JSON.parse(input) as ParsedOptions
+  } catch {
+    const options: ParsedOptions = {}
+    for (const line of input.split('\n')) {
+      const trimmed = line.trim()
+      if (trimmed === '' || trimmed.startsWith('#')) {
+        continue
+      }
+      const match = trimmed.match(/^([^:#]+):\s*(.*)$/)
+      if (match === null) {
+        throw new Error('Invalid options format')
+      }
+      const [, key, value] = match
+      options[key.trim()] = value.trim().replace(/^['"]|['"]$/g, '')
+    }
+    return options
+  }
+}
+
 void (async function main(): Promise<void> {
   try {
     await ssh()
@@ -138,21 +165,26 @@ async function dep(): Promise<void> {
   }
 
   const ansi = core.getBooleanInput('ansi') ? '--ansi' : '--no-ansi'
-  const verbosityArgs: string[] = []
-  const verbosityInput = core.getInput('verbosity')
-  if (verbosityInput !== '') {
-    verbosityArgs.push(verbosityInput)
-  }
   const options: string[] = []
+  let verbosityInput = core.getInput('verbosity')
   try {
     const optionsArg = core.getInput('options')
-    if (optionsArg !== '') {
-      for (const [key, value] of Object.entries(JSON.parse(optionsArg))) {
-        options.push('-o', `${key}=${value}`)
-      }
+    const parsedOptions = parseOptions(optionsArg)
+    if (parsedOptions.verbosity !== undefined) {
+      verbosityInput = parsedOptions.verbosity
+      delete parsedOptions.verbosity
+    }
+    for (const [key, value] of Object.entries(parsedOptions)) {
+      options.push('-o', `${key}=${value}`)
     }
   } catch (e) {
-    console.error('Invalid JSON in options')
+    core.setFailed('Invalid options format. Use JSON or key: value lines.')
+    return
+  }
+
+  const verbosityArgs: string[] = []
+  if (verbosityInput !== '') {
+    verbosityArgs.push(verbosityInput)
   }
 
   let phpBin = 'php'
