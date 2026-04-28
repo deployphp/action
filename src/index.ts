@@ -40,10 +40,30 @@ async function ssh(): Promise<void> {
   let privateKey = core.getInput('private-key')
   if (privateKey !== '') {
     privateKey = privateKey.replace(/\r/g, '').trim() + '\n'
-    const p = $`ssh-add -`
-    p.stdin.write(privateKey)
-    p.stdin.end()
-    await p
+    const passphrase = core.getInput('private-key-passphrase')
+    if (passphrase === '') {
+      const p = $`ssh-add -`
+      p.stdin.write(privateKey)
+      p.stdin.end()
+      await p
+    } else {
+      core.setSecret(passphrase)
+      const keyPath = `${process.env['RUNNER_TEMP'] ?? '/tmp'}/deployer-ssh-key`
+      const askpassPath = `${process.env['RUNNER_TEMP'] ?? '/tmp'}/deployer-ssh-askpass.sh`
+      fs.writeFileSync(keyPath, privateKey, { mode: 0o600 })
+      fs.writeFileSync(askpassPath, `#!/bin/sh\nprintf '%s\\n' \"$DEPLOYER_SSH_KEY_PASSPHRASE\"\n`, { mode: 0o700 })
+      try {
+        process.env['DEPLOYER_SSH_KEY_PASSPHRASE'] = passphrase
+        process.env['SSH_ASKPASS'] = askpassPath
+        process.env['SSH_ASKPASS_REQUIRE'] = 'force'
+        process.env['DISPLAY'] = process.env['DISPLAY'] ?? ':0'
+        await $`ssh-add ${keyPath}`
+      } finally {
+        delete process.env['DEPLOYER_SSH_KEY_PASSPHRASE']
+        fs.rmSync(keyPath, { force: true })
+        fs.rmSync(askpassPath, { force: true })
+      }
+    }
   }
 
   const knownHosts = core.getInput('known-hosts')
