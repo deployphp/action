@@ -33,9 +33,14 @@ async function ssh(): Promise<void> {
     fs.mkdirSync(sshHomeDir)
   }
 
-  const authSock = '/tmp/ssh-auth.sock'
-  await $`ssh-agent -a ${authSock}`
-  core.exportVariable('SSH_AUTH_SOCK', authSock)
+  const existingAuthSock = process.env['SSH_AUTH_SOCK']
+  if (existingAuthSock !== undefined && existingAuthSock !== '' && fs.existsSync(existingAuthSock)) {
+    console.log(`Using existing SSH agent socket at ${existingAuthSock}.`)
+  } else {
+    const authSock = '/tmp/ssh-auth.sock'
+    await $`ssh-agent -a ${authSock}`
+    core.exportVariable('SSH_AUTH_SOCK', authSock)
+  }
 
   let privateKey = core.getInput('private-key')
   if (privateKey !== '') {
