@@ -27,6 +27,11 @@ inputs:
     default: ''
     description: The private key for connecting to remote hosts.
 
+  private-key-passphrase:
+    required: false
+    default: ''
+    description: Passphrase for the private key.
+
   known-hosts:
     required: false
     default: ''

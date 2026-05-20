@@ -36650,10 +36650,36 @@ async function ssh() {
 	let privateKey = getInput("private-key");
 	if (privateKey !== "") {
 		privateKey = privateKey.replace(/\r/g, "").trim() + "\n";
+		const privateKeyPassphrase = getInput("private-key-passphrase");
+		const askPassPath = privateKeyPassphrase !== "" ? `${sshHomeDir}/askpass.sh` : "";
+		if (askPassPath !== "") {
+			fs.writeFileSync(askPassPath, "#!/bin/sh\nprintf \"%s\\n\" \"$SSH_KEY_PASSPHRASE\"\n");
+			fs.chmodSync(askPassPath, "700");
+		}
+		const previousAskPass = process.env["SSH_ASKPASS"];
+		const previousAskPassRequire = process.env["SSH_ASKPASS_REQUIRE"];
+		const previousDisplay = process.env["DISPLAY"];
+		const previousKeyPassphrase = process.env["SSH_KEY_PASSPHRASE"];
+		if (askPassPath !== "") {
+			process.env["SSH_ASKPASS"] = askPassPath;
+			process.env["SSH_ASKPASS_REQUIRE"] = "force";
+			process.env["DISPLAY"] = process.env["DISPLAY"] || ":0";
+			process.env["SSH_KEY_PASSPHRASE"] = privateKeyPassphrase;
+		}
 		const p = $`ssh-add -`;
 		p.stdin.write(privateKey);
 		p.stdin.end();
-		await p;
+		try {
+			await p;
+		} finally {
+			if (askPassPath !== "") {
+				restoreEnv("SSH_ASKPASS", previousAskPass);
+				restoreEnv("SSH_ASKPASS_REQUIRE", previousAskPassRequire);
+				restoreEnv("DISPLAY", previousDisplay);
+				restoreEnv("SSH_KEY_PASSPHRASE", previousKeyPassphrase);
+				fs.rmSync(askPassPath, { force: true });
+			}
+		}
 	}
 	const knownHosts = getInput("known-hosts");
 	if (knownHosts !== "") {
@@ -36668,6 +36694,10 @@ async function ssh() {
 		fs.writeFileSync(`${sshHomeDir}/config`, sshConfig);
 		fs.chmodSync(`${sshHomeDir}/config`, "600");
 	}
+}
+function restoreEnv(key, value) {
+	if (value === void 0) delete process.env[key];
+	else process.env[key] = value;
 }
 async function dep() {
 	let bin = getInput("deployer-binary");
