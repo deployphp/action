@@ -13,6 +13,12 @@ interface DeployerManifestEntry {
   url: string
 }
 
+interface CommandError extends Error {
+  code?: string
+  stdout?: string
+  stderr?: string
+}
+
 void (async function main(): Promise<void> {
   try {
     await ssh()
@@ -161,9 +167,67 @@ async function dep(): Promise<void> {
     phpBin = phpBinArg
   }
 
+  const commandArgs = [
+    ...cmd,
+    ...recipeArgs,
+    '--no-interaction',
+    ansi,
+    ...verbosityArgs,
+    ...options,
+  ]
   try {
-    await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`
+    await $`${phpBin} ${bin} ${commandArgs}`
   } catch (err) {
-    core.setFailed(`Failed: dep ${cmd}`)
+    throw new Error(formatCommandError(err, phpBin, bin, commandArgs))
   }
+}
+
+function formatCommandError(
+  err: unknown,
+  phpBin: string,
+  deployerBin: string,
+  args: string[],
+): string {
+  const command = [phpBin, deployerBin, ...args].join(' ')
+  const details = getCommandErrorDetails(err)
+  const hint = isMissingCommandError(err)
+    ? '\n\nA command needed to start Deployer was not found. Verify PHP is installed and the "deployer-binary" input points to an existing Deployer PHAR/binary, or set "deployer-version" so this action can download Deployer.'
+    : ''
+
+  return `Failed to run Deployer command:\n${command}${hint}${details}`
+}
+
+function getCommandErrorDetails(err: unknown): string {
+  if (!(err instanceof Error)) {
+    return `\n\nOriginal error: ${String(err)}`
+  }
+
+  const commandError = err as CommandError
+  const stderr = commandError.stderr?.trim()
+  const stdout = commandError.stdout?.trim()
+  const output = [stderr, stdout].filter(Boolean).join('\n')
+
+  if (output !== '') {
+    return `\n\nCommand output:\n${output}`
+  }
+
+  return `\n\nOriginal error: ${err.message}`
+}
+
+function isMissingCommandError(err: unknown): boolean {
+  if (!(err instanceof Error)) {
+    return false
+  }
+
+  const commandError = err as CommandError
+  const output = [commandError.stderr, commandError.stdout, err.message]
+    .filter(Boolean)
+    .join('\n')
+
+  return (
+    commandError.code === 'ENOENT' ||
+    output.includes('ENOENT') ||
+    output.includes('No such file or directory') ||
+    output.includes('Could not open input file')
+  )
 }
