@@ -37,6 +37,10 @@
     # Optional.
     private-key: ${{ secrets.PRIVATE_KEY }}
 
+    # Passphrase for the private key, if it is encrypted.
+    # Optional.
+    private-key-passphrase: ${{ secrets.PRIVATE_KEY_PASSPHRASE }}
+
     # Content of `~/.ssh/known_hosts` file. The public SSH keys for a
     # host may be obtained using the utility `ssh-keyscan`.
     # For example: `ssh-keyscan deployer.org`.
