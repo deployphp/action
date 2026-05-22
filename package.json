@@ -7,6 +7,7 @@
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

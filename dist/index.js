@@ -6,6 +6,7 @@ import * as fs$1 from "fs";
 import { constants, promises } from "fs";
 import * as path$1 from "path";
 import * as events from "events";
+import { fileURLToPath } from "node:url";
 import "child_process";
 import "timers";
 import * as process$1 from "node:process";
@@ -36632,25 +36633,49 @@ var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, mi
 //#endregion
 //#region src/index.ts
 $.verbose = true;
-(async function main() {
+var DEFAULT_AUTH_SOCK = "/tmp/ssh-auth.sock";
+async function main() {
 	try {
 		await ssh();
 		await dep();
 	} catch (err) {
 		setFailed(err instanceof Error ? err.message : String(err));
 	}
-})();
+}
+async function sshAgentIsReachable(authSock) {
+	try {
+		await $({ env: {
+			...process.env,
+			SSH_AUTH_SOCK: authSock
+		} })`ssh-add -l`;
+		return true;
+	} catch (err) {
+		return (err instanceof Error ? err.message : String(err)).includes("The agent has no identities.");
+	}
+}
+async function ensureSshAgent(authSock) {
+	if (await sshAgentIsReachable(authSock)) {
+		exportVariable("SSH_AUTH_SOCK", authSock);
+		return;
+	}
+	if (fs.existsSync(authSock)) fs.rmSync(authSock, { force: true });
+	const agentPid = (await $`ssh-agent -a ${authSock}`).stdout.match(/SSH_AGENT_PID=(\d+)/)?.[1];
+	exportVariable("SSH_AUTH_SOCK", authSock);
+	if (agentPid !== void 0) exportVariable("SSH_AGENT_PID", agentPid);
+}
 async function ssh() {
 	if (getBooleanInput("skip-ssh-setup")) return;
 	const sshHomeDir = `${process.env["HOME"]}/.ssh`;
 	if (!fs.existsSync(sshHomeDir)) fs.mkdirSync(sshHomeDir);
-	const authSock = "/tmp/ssh-auth.sock";
-	await $`ssh-agent -a ${authSock}`;
-	exportVariable("SSH_AUTH_SOCK", authSock);
+	const authSock = process.env["SSH_AUTH_SOCK"] || DEFAULT_AUTH_SOCK;
+	await ensureSshAgent(authSock);
 	let privateKey = getInput("private-key");
 	if (privateKey !== "") {
 		privateKey = privateKey.replace(/\r/g, "").trim() + "\n";
-		const p = $`ssh-add -`;
+		const p = $({ env: {
+			...process.env,
+			SSH_AUTH_SOCK: authSock
+		} })`ssh-add -`;
 		p.stdin.write(privateKey);
 		p.stdin.end();
 		await p;
@@ -36731,5 +36756,6 @@ async function dep() {
 		setFailed(`Failed: dep ${cmd}`);
 	}
 }
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();
 //#endregion
-export {};
+export { dep, main, ssh };

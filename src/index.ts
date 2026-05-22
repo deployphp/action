@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { $, fs, cd } from 'zx'
+import { fileURLToPath } from 'node:url'
 
 $.verbose = true
 
@@ -13,16 +14,47 @@ interface DeployerManifestEntry {
   url: string
 }
 
-void (async function main(): Promise<void> {
+const DEFAULT_AUTH_SOCK = '/tmp/ssh-auth.sock'
+
+export async function main(): Promise<void> {
   try {
     await ssh()
     await dep()
   } catch (err) {
     core.setFailed(err instanceof Error ? err.message : String(err))
   }
-})()
+}
 
-async function ssh(): Promise<void> {
+async function sshAgentIsReachable(authSock: string): Promise<boolean> {
+  try {
+    await $({ env: { ...process.env, SSH_AUTH_SOCK: authSock } })`ssh-add -l`
+    return true
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return message.includes('The agent has no identities.')
+  }
+}
+
+async function ensureSshAgent(authSock: string): Promise<void> {
+  if (await sshAgentIsReachable(authSock)) {
+    core.exportVariable('SSH_AUTH_SOCK', authSock)
+    return
+  }
+
+  if (fs.existsSync(authSock)) {
+    fs.rmSync(authSock, { force: true })
+  }
+
+  const result = await $`ssh-agent -a ${authSock}`
+  const agentPid = result.stdout.match(/SSH_AGENT_PID=(\d+)/)?.[1]
+
+  core.exportVariable('SSH_AUTH_SOCK', authSock)
+  if (agentPid !== undefined) {
+    core.exportVariable('SSH_AGENT_PID', agentPid)
+  }
+}
+
+export async function ssh(): Promise<void> {
   if (core.getBooleanInput('skip-ssh-setup')) {
     return
   }
@@ -33,14 +65,13 @@ async function ssh(): Promise<void> {
     fs.mkdirSync(sshHomeDir)
   }
 
-  const authSock = '/tmp/ssh-auth.sock'
-  await $`ssh-agent -a ${authSock}`
-  core.exportVariable('SSH_AUTH_SOCK', authSock)
+  const authSock = process.env['SSH_AUTH_SOCK'] || DEFAULT_AUTH_SOCK
+  await ensureSshAgent(authSock)
 
   let privateKey = core.getInput('private-key')
   if (privateKey !== '') {
     privateKey = privateKey.replace(/\r/g, '').trim() + '\n'
-    const p = $`ssh-add -`
+    const p = $({ env: { ...process.env, SSH_AUTH_SOCK: authSock } })`ssh-add -`
     p.stdin.write(privateKey)
     p.stdin.end()
     await p
@@ -62,7 +93,7 @@ async function ssh(): Promise<void> {
   }
 }
 
-async function dep(): Promise<void> {
+export async function dep(): Promise<void> {
   let bin = core.getInput('deployer-binary')
   const subDirectory = core.getInput('sub-directory').trim()
 
@@ -166,4 +197,8 @@ async function dep(): Promise<void> {
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  void main()
 }
