@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { $, fs, cd } from 'zx'
+import { fileURLToPath } from 'node:url'
 
 $.verbose = true
 
@@ -13,14 +14,46 @@ interface DeployerManifestEntry {
   url: string
 }
 
-void (async function main(): Promise<void> {
+export function deployerReleaseUrl(version: string): string {
+  return `https://deployer.org/releases/v${version}/deployer.phar`
+}
+
+export function manifestPath(): string {
+  return `${process.env['RUNNER_TEMP'] ?? '.'}/deployer-manifest.json`
+}
+
+export async function loadDeployerManifest(): Promise<DeployerManifestEntry[]> {
+  const path = manifestPath()
+  try {
+    await $`curl -fsSL -o ${path} https://deployer.org/manifest.json`
+  } catch (err) {
+    if (fs.existsSync(path)) {
+      core.error(fs.readFileSync(path, 'utf8'))
+    }
+    throw err
+  }
+  return JSON.parse(fs.readFileSync(path, 'utf8')) as DeployerManifestEntry[]
+}
+
+export async function resolveDeployerDownloadUrl(
+  version: string,
+  explicitVersion: boolean,
+): Promise<string | undefined> {
+  if (explicitVersion) {
+    return deployerReleaseUrl(version)
+  }
+  const manifest = await loadDeployerManifest()
+  return manifest.find((asset) => asset.version === version)?.url
+}
+
+export async function main(): Promise<void> {
   try {
     await ssh()
     await dep()
   } catch (err) {
     core.setFailed(err instanceof Error ? err.message : String(err))
   }
-})()
+}
 
 async function ssh(): Promise<void> {
   if (core.getBooleanInput('skip-ssh-setup')) {
@@ -85,7 +118,8 @@ async function dep(): Promise<void> {
   }
 
   if (bin === '') {
-    let version: string | undefined = core.getInput('deployer-version')
+    const explicitVersion = core.getInput('deployer-version')
+    let version: string | undefined = explicitVersion
     if (version === '' && fs.existsSync('composer.lock')) {
       const lock: ComposerLock = JSON.parse(
         fs.readFileSync('composer.lock', 'utf8'),
@@ -107,16 +141,10 @@ async function dep(): Promise<void> {
       )
     }
     version = version.replace(/^v/, '')
-    const manifest: DeployerManifestEntry[] = JSON.parse(
-      (await $`curl -L https://deployer.org/manifest.json`).stdout,
+    const url = await resolveDeployerDownloadUrl(
+      version,
+      explicitVersion !== '',
     )
-    let url: string | undefined
-    for (const asset of manifest) {
-      if (asset.version === version) {
-        url = asset.url
-        break
-      }
-    }
     if (url === undefined) {
       core.setFailed(
         `The version "${version}" does not exist in the "https://deployer.org/manifest.json" file.`,
@@ -166,4 +194,8 @@ async function dep(): Promise<void> {
   } catch (err) {
     core.setFailed(`Failed: dep ${cmd}`)
   }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  void main()
 }

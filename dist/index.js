@@ -6,6 +6,7 @@ import * as fs$1 from "fs";
 import { constants, promises } from "fs";
 import * as path$1 from "path";
 import * as events from "events";
+import { fileURLToPath } from "node:url";
 import "child_process";
 import "timers";
 import * as process$1 from "node:process";
@@ -36632,14 +36633,34 @@ var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, mi
 //#endregion
 //#region src/index.ts
 $.verbose = true;
-(async function main() {
+function deployerReleaseUrl(version) {
+	return `https://deployer.org/releases/v${version}/deployer.phar`;
+}
+function manifestPath() {
+	return `${process.env["RUNNER_TEMP"] ?? "."}/deployer-manifest.json`;
+}
+async function loadDeployerManifest() {
+	const path = manifestPath();
+	try {
+		await $`curl -fsSL -o ${path} https://deployer.org/manifest.json`;
+	} catch (err) {
+		if (fs.existsSync(path)) error(fs.readFileSync(path, "utf8"));
+		throw err;
+	}
+	return JSON.parse(fs.readFileSync(path, "utf8"));
+}
+async function resolveDeployerDownloadUrl(version, explicitVersion) {
+	if (explicitVersion) return deployerReleaseUrl(version);
+	return (await loadDeployerManifest()).find((asset) => asset.version === version)?.url;
+}
+async function main() {
 	try {
 		await ssh();
 		await dep();
 	} catch (err) {
 		setFailed(err instanceof Error ? err.message : String(err));
 	}
-})();
+}
 async function ssh() {
 	if (getBooleanInput("skip-ssh-setup")) return;
 	const sshHomeDir = `${process.env["HOME"]}/.ssh`;
@@ -36685,7 +36706,8 @@ async function dep() {
 		}
 	}
 	if (bin === "") {
-		let version = getInput("deployer-version");
+		const explicitVersion = getInput("deployer-version");
+		let version = explicitVersion;
 		if (version === "" && fs.existsSync("composer.lock")) {
 			const lock = JSON.parse(fs.readFileSync("composer.lock", "utf8"));
 			if (lock.packages) version = lock.packages.find((p) => p.name === "deployer/deployer")?.version;
@@ -36693,12 +36715,7 @@ async function dep() {
 		}
 		if (version === "" || version === void 0) throw new Error("Deployer binary not found. Please specify deployer-binary or deployer-version.");
 		version = version.replace(/^v/, "");
-		const manifest = JSON.parse((await $`curl -L https://deployer.org/manifest.json`).stdout);
-		let url;
-		for (const asset of manifest) if (asset.version === version) {
-			url = asset.url;
-			break;
-		}
+		const url = await resolveDeployerDownloadUrl(version, explicitVersion !== "");
 		if (url === void 0) setFailed(`The version "${version}" does not exist in the "https://deployer.org/manifest.json" file.`);
 		else {
 			console.log(`Downloading "${url}".`);
@@ -36731,5 +36748,6 @@ async function dep() {
 		setFailed(`Failed: dep ${cmd}`);
 	}
 }
+if (process.argv[1] === fileURLToPath(import.meta.url)) main();
 //#endregion
-export {};
+export { deployerReleaseUrl, loadDeployerManifest, main, manifestPath, resolveDeployerDownloadUrl };
