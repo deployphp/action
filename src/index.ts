@@ -1,7 +1,15 @@
 import * as core from '@actions/core'
+import { fileURLToPath } from 'node:url'
 import { $, fs, cd } from 'zx'
 
 $.verbose = true
+
+export function depCommandFailureMessage(err: unknown): string {
+  if (err instanceof Error) {
+    return err.message
+  }
+  return String(err)
+}
 
 interface ComposerLock {
   packages?: Array<{ name: string; version: string }>
@@ -13,14 +21,22 @@ interface DeployerManifestEntry {
   url: string
 }
 
-void (async function main(): Promise<void> {
+export async function main(): Promise<void> {
   try {
     await ssh()
     await dep()
   } catch (err) {
     core.setFailed(err instanceof Error ? err.message : String(err))
   }
-})()
+}
+
+const isEntrypoint =
+  process.argv[1] !== undefined &&
+  fileURLToPath(import.meta.url) === process.argv[1]
+
+if (isEntrypoint) {
+  void main()
+}
 
 async function ssh(): Promise<void> {
   if (core.getBooleanInput('skip-ssh-setup')) {
@@ -164,6 +180,6 @@ async function dep(): Promise<void> {
   try {
     await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`
   } catch (err) {
-    core.setFailed(`Failed: dep ${cmd}`)
+    core.setFailed(depCommandFailureMessage(err))
   }
 }
