@@ -6,6 +6,7 @@ import * as fs$1 from "fs";
 import { constants, promises } from "fs";
 import * as path$1 from "path";
 import * as events from "events";
+import { fileURLToPath } from "node:url";
 import "child_process";
 import "timers";
 import * as process$1 from "node:process";
@@ -36632,14 +36633,19 @@ var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, mi
 //#endregion
 //#region src/index.ts
 $.verbose = true;
-(async function main() {
+function depCommandFailureMessage(err) {
+	if (err instanceof Error) return err.message;
+	return String(err);
+}
+async function main() {
 	try {
 		await ssh();
 		await dep();
 	} catch (err) {
 		setFailed(err instanceof Error ? err.message : String(err));
 	}
-})();
+}
+if (process.argv[1] !== void 0 && fileURLToPath(import.meta.url) === process.argv[1]) main();
 async function ssh() {
 	if (getBooleanInput("skip-ssh-setup")) return;
 	const sshHomeDir = `${process.env["HOME"]}/.ssh`;
@@ -36728,8 +36734,8 @@ async function dep() {
 	try {
 		await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`;
 	} catch (err) {
-		setFailed(`Failed: dep ${cmd}`);
+		setFailed(depCommandFailureMessage(err));
 	}
 }
 //#endregion
-export {};
+export { depCommandFailureMessage, main };
