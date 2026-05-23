@@ -36630,6 +36630,59 @@ var import_build = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((expo
 })))(), 1);
 var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, minimist, nothrow, parseArgv, question, quiet, retry, sleep, spinner, stdin, tempdir, tempfile, tmpdir, tmpfile, updateArgv, version, versions, $, Fail, ProcessOutput, ProcessPromise, bus, cd, chalk, defaults, kill, log, os: os$1, path, ps, quote, quotePowerShell, resolveDefaults, syncProcessCwd, useBash, usePowerShell, usePwsh, which, within } = globalThis.Deno ? globalThis.require("./index.cjs") : import_build;
 //#endregion
+//#region src/host-key-verification.ts
+var HOST_KEY_VERIFICATION_FAILED = /host key verification failed/i;
+/** Deployer wraps remote output as `[host] < …`. */
+var DEPLOYER_HOST_KEY_LINE = /^\[([^\]]+)\]\s*<.*host key verification failed/i;
+var OPENSSH_HOST_KEY_CHANGED = /\bhost key for ([^\s]+) has changed/i;
+var OPENSSH_HOST_KEY_UNKNOWN = /No \S+ host key is known for (\S+)/i;
+var OPENSSH_THE_HOST_KEY = /The \S+ host key for ([^\s]+) has changed/i;
+function isHostKeyVerificationFailure(output) {
+	return HOST_KEY_VERIFICATION_FAILED.test(output);
+}
+function parseHostsFromHostKeyFailure(output) {
+	const hosts = /* @__PURE__ */ new Set();
+	for (const line of output.split(/\r?\n/)) {
+		const deployer = DEPLOYER_HOST_KEY_LINE.exec(line);
+		if (deployer) {
+			hosts.add(deployer[1]);
+			continue;
+		}
+		for (const pattern of [
+			OPENSSH_HOST_KEY_CHANGED,
+			OPENSSH_HOST_KEY_UNKNOWN,
+			OPENSSH_THE_HOST_KEY
+		]) {
+			const match = pattern.exec(line);
+			if (match) hosts.add(match[1].replace(/\.$/, ""));
+		}
+	}
+	return [...hosts];
+}
+function formatHostKeyVerificationGuidance(hosts, knownHostsConfigured) {
+	const hostList = hosts.length > 0 ? hosts.join(", ") : "(not found in the log — check hosts in your Deployer recipe)";
+	const scanExample = hosts.length === 1 ? `  ssh-keyscan -t rsa,ecdsa,ed25519 ${hosts[0]}` : "  ssh-keyscan -t rsa,ecdsa,ed25519 YOUR_DEPLOY_HOST";
+	const knownHostsHint = knownHostsConfigured ? "The known-hosts input is set, but this host is missing or its key no longer matches the server (for example after reinstall or key rotation)." : "When known-hosts is empty this action disables StrictHostKeyChecking; if you still see this, check ssh-config or other SSH settings.";
+	return [
+		"SSH host key verification failed for the remote deployment server.",
+		`Remote host(s): ${hostList}`,
+		"",
+		"This refers to the remote server SSH host key (server identity), not your deploy private-key secret.",
+		"It is unrelated to github.com unless your Deployer recipe connects to GitHub over SSH.",
+		knownHostsHint,
+		"",
+		"Update the action known-hosts input with a current key, for example:",
+		scanExample,
+		"",
+		"https://github.com/deployphp/action/issues/61"
+	].join("\n");
+}
+function commandOutput(err) {
+	if (err !== null && typeof err === "object" && "stdall" in err && typeof err.stdall === "string") return err.stdall;
+	if (err instanceof Error) return err.message;
+	return String(err);
+}
+//#endregion
 //#region src/index.ts
 $.verbose = true;
 (async function main() {
@@ -36728,6 +36781,8 @@ async function dep() {
 	try {
 		await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`;
 	} catch (err) {
+		const output = commandOutput(err);
+		if (isHostKeyVerificationFailure(output)) error(formatHostKeyVerificationGuidance(parseHostsFromHostKeyFailure(output), getInput("known-hosts") !== ""));
 		setFailed(`Failed: dep ${cmd}`);
 	}
 }
