@@ -1,5 +1,11 @@
 import * as core from '@actions/core'
 import { $, fs, cd } from 'zx'
+import {
+  commandOutput,
+  formatHostKeyVerificationGuidance,
+  isHostKeyVerificationFailure,
+  parseHostsFromHostKeyFailure,
+} from './host-key-verification.js'
 
 $.verbose = true
 
@@ -164,6 +170,16 @@ async function dep(): Promise<void> {
   try {
     await $`${phpBin} ${bin} ${cmd} ${recipeArgs} --no-interaction ${ansi} ${verbosityArgs} ${options}`
   } catch (err) {
+    const output = commandOutput(err)
+    if (isHostKeyVerificationFailure(output)) {
+      const hosts = parseHostsFromHostKeyFailure(output)
+      core.error(
+        formatHostKeyVerificationGuidance(
+          hosts,
+          core.getInput('known-hosts') !== '',
+        ),
+      )
+    }
     core.setFailed(`Failed: dep ${cmd}`)
   }
 }
