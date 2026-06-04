@@ -6,6 +6,7 @@
   },
   "scripts": {
     "build": "vite build",
+    "test": "node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

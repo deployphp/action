@@ -62,7 +62,8 @@
     # - `vendor/bin/deployer.phar`
     # - `vendor/bin/dep`
     # - `deployer.phar`
-    # If the binary not found, phar version will be downloaded from
+    # - `vendor/bin/dep` in Composer's global home
+    # If the binary is not found, phar version will be downloaded from
     # deployer.org.
     # Optional.
     deployer-version: '7.0.0'

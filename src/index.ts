@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { $, fs, cd } from 'zx'
+import { findLocalDeployerBinary } from './deployerBinary'
 
 $.verbose = true
 
@@ -71,16 +72,18 @@ async function dep(): Promise<void> {
   }
 
   if (bin === '') {
-    for (const c of [
-      'vendor/bin/deployer.phar',
-      'vendor/bin/dep',
-      'deployer.phar',
-    ]) {
-      if (fs.existsSync(c)) {
-        bin = c
-        console.log(`Using "${c}".`)
-        break
-      }
+    bin = await findLocalDeployerBinary({
+      fs,
+      getComposerGlobalHome: async () => {
+        try {
+          return (await $`composer -n config --global home`).stdout.trim()
+        } catch {
+          return undefined
+        }
+      },
+    })
+    if (bin !== '') {
+      console.log(`Using "${bin}".`)
     }
   }
 

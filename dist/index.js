@@ -36630,6 +36630,21 @@ var import_build = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((expo
 })))(), 1);
 var { VERSION, YAML, argv, dotenv, echo, expBackoff, fetch, fs, glob, globby, minimist, nothrow, parseArgv, question, quiet, retry, sleep, spinner, stdin, tempdir, tempfile, tmpdir, tmpfile, updateArgv, version, versions, $, Fail, ProcessOutput, ProcessPromise, bus, cd, chalk, defaults, kill, log, os: os$1, path, ps, quote, quotePowerShell, resolveDefaults, syncProcessCwd, useBash, usePowerShell, usePwsh, which, within } = globalThis.Deno ? globalThis.require("./index.cjs") : import_build;
 //#endregion
+//#region src/deployerBinary.ts
+var PROJECT_LOCAL_DEPLOYER_BINARIES = [
+	"vendor/bin/deployer.phar",
+	"vendor/bin/dep",
+	"deployer.phar"
+];
+async function findLocalDeployerBinary({ fs, getComposerGlobalHome }) {
+	for (const candidate of PROJECT_LOCAL_DEPLOYER_BINARIES) if (fs.existsSync(candidate)) return candidate;
+	const composerGlobalHome = (await getComposerGlobalHome?.())?.trim();
+	if (composerGlobalHome === void 0 || composerGlobalHome === "") return "";
+	const composerGlobalDep = `${composerGlobalHome.replace(/\/+$/, "")}/vendor/bin/dep`;
+	if (fs.existsSync(composerGlobalDep)) return composerGlobalDep;
+	return "";
+}
+//#endregion
 //#region src/index.ts
 $.verbose = true;
 (async function main() {
@@ -36674,15 +36689,17 @@ async function dep() {
 	const subDirectory = getInput("sub-directory").trim();
 	if (subDirectory !== "") cd(subDirectory);
 	if (bin === "") {
-		for (const c of [
-			"vendor/bin/deployer.phar",
-			"vendor/bin/dep",
-			"deployer.phar"
-		]) if (fs.existsSync(c)) {
-			bin = c;
-			console.log(`Using "${c}".`);
-			break;
-		}
+		bin = await findLocalDeployerBinary({
+			fs,
+			getComposerGlobalHome: async () => {
+				try {
+					return (await $`composer -n config --global home`).stdout.trim();
+				} catch {
+					return;
+				}
+			}
+		});
+		if (bin !== "") console.log(`Using "${bin}".`);
 	}
 	if (bin === "") {
 		let version = getInput("deployer-version");
