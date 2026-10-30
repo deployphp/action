@@ -107,9 +107,15 @@ async function dep(): Promise<void> {
       )
     }
     version = version.replace(/^v/, '')
-    const manifest: DeployerManifestEntry[] = JSON.parse(
-      (await $`curl -L https://deployer.org/manifest.json`).stdout,
-    )
+    $.verbose = false
+    let manifest: DeployerManifestEntry[]
+    try {
+      manifest = JSON.parse(
+        (await $`curl -L https://deployer.org/manifest.json`).stdout,
+      )
+    } finally {
+      $.verbose = true
+    }
     let url: string | undefined
     for (const asset of manifest) {
       if (asset.version === version) {
