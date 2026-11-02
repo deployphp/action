@@ -44,6 +44,10 @@ async function ssh(): Promise<void> {
     p.stdin.write(privateKey)
     p.stdin.end()
     await p
+  } else {
+    core.warning(
+      'No "private-key" input provided (or the referenced GitHub Actions secret is empty). Proceeding without adding an SSH key to ssh-agent.',
+    )
   }
 
   const knownHosts = core.getInput('known-hosts')
