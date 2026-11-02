@@ -16163,6 +16163,9 @@ function setFailed(message) {
 function error(message, properties = {}) {
 	issueCommand("error", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
+function warning(message, properties = {}) {
+	issueCommand("warning", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
 //#endregion
 //#region node_modules/zx/build/deno.js
 if (globalThis.Deno) {
@@ -36654,6 +36657,8 @@ async function ssh() {
 		p.stdin.write(privateKey);
 		p.stdin.end();
 		await p;
+	} else {
+		warning("No \"private-key\" input provided (or the referenced GitHub Actions secret is empty). Proceeding without adding an SSH key to ssh-agent.");
 	}
 	const knownHosts = getInput("known-hosts");
 	if (knownHosts !== "") {
